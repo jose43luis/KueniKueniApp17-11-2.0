@@ -1,5 +1,83 @@
 // donation.js - Sistema de donaciones con conexión a Supabase
 
+const EMAIL_SERVER_URL = 'http://localhost:3000';
+
+async function enviarComprobanteDonacion(donacion) {
+    try {
+        const response = await fetch(`${EMAIL_SERVER_URL}/send-donation-receipt`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: donacion.email,
+                nombre: donacion.nombre,
+                monto: donacion.monto,
+                fecha: donacion.fecha || new Date().toLocaleDateString('es-MX'),
+                folio: donacion.folio || `DON-${Date.now()}`,
+                metodo_pago: donacion.metodo_pago
+            })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            console.log('✅ Comprobante enviado');
+            return true;
+        } else {
+            console.error('❌ Error:', data.error);
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error al enviar comprobante:', error);
+        return false;
+    }
+}
+
+
+
+
+
+
+
+// Después de guardar la donación en Supabase
+const { data: donacion, error } = await supabaseClient
+    .from('donaciones')
+    .insert([nuevaDonacion])
+    .select()
+    .single();
+
+if (donacion && !error) {
+    // Enviar comprobante por correo
+    await enviarComprobanteDonacion({
+        email: donacion.email || sessionStorage.getItem('userEmail'),
+        nombre: donacion.nombre_donante || sessionStorage.getItem('userName'),
+        monto: donacion.monto,
+        fecha: donacion.fecha_donacion,
+        folio: donacion.id,
+        metodo_pago: donacion.metodo_pago
+    });
+    
+    alert('¡Donación registrada! Revisa tu correo para el comprobante.');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     let selectedAmount = 0;
     let isCustomAmount = false;

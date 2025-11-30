@@ -1,6 +1,9 @@
 // socio-donar.js - Sistema de donaciones para socios (CORREGIDO)
 // ============================================================================
 
+
+const EMAIL_SERVER_URL = 'http://localhost:3000';
+
 document.addEventListener('DOMContentLoaded', async function() {
     // ============================================
     // VERIFICAR AUTENTICACIÓN
@@ -297,7 +300,32 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
             
             console.log('Donación del socio guardada exitosamente:', data);
-            
+            // Enviar comprobante por correo
+   try {
+       console.log('📧 Enviando comprobante...');
+       const emailResponse = await fetch(`${EMAIL_SERVER_URL}/send-donation-receipt`, {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+               email: sessionStorage.getItem('userEmail'),
+               nombre: sessionStorage.getItem('userName'),
+               monto: datos.monto,
+               fecha: datos.fecha_donacion,
+               folio: datos.referencia_pago,
+               metodo_pago: datos.metodo_pago
+           })
+       });
+       
+       if (emailResponse.ok) {
+           console.log('✅ Comprobante enviado');
+       }
+   } catch (emailError) {
+       console.log('⚠️ Error al enviar comprobante:', emailError);
+   }
+
+
+
+
             mostrarMensajeExito(datos);
             
             setTimeout(() => {
