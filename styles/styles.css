@@ -288,13 +288,19 @@ body {
 }
 
 @keyframes heartbeat {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
-    10%, 30% {
+
+    10%,
+    30% {
         transform: scale(1.1);
     }
-    20%, 40% {
+
+    20%,
+    40% {
         transform: scale(1);
     }
 }
@@ -308,37 +314,17 @@ body {
 }
 
 @keyframes gradientShift {
-    0%, 100% {
+
+    0%,
+    100% {
         background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
     }
+
     50% {
         background: linear-gradient(135deg, #7d1167 0%, var(--primary-green) 100%);
     }
 }
 
-/* Hero Section - Página Acerca de */
-.hero {
-    background-color: var(--white);
-    padding: 80px 0 60px;
-    text-align: center;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.hero-title {
-    font-size: 42px;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 16px;
-    letter-spacing: -0.02em;
-}
-
-.hero-subtitle {
-    font-size: 17px;
-    color: var(--text-gray);
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.6;
-}
 
 /* Hero Home - Página Principal con Carrusel */
 .hero-home {
@@ -513,15 +499,18 @@ body {
 }
 
 
-.btn-hero-primary > * {
+.btn-hero-primary>* {
     position: relative;
     z-index: 1;
 }
 
 @keyframes shimmer {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateX(-100%);
     }
+
     50% {
         transform: translateX(100%);
     }
@@ -557,9 +546,39 @@ body {
     background-color: var(--secondary-beige);
 }
 
-/* Main Description */
+/* ============================================
+   CAMBIOS Y ADICIONES PARA ACERCA-DE.HTML
+   ============================================ */
+
+/* Hero Section - Página Acerca de */
+.hero {
+    background-color: var(--white);
+    padding: 80px 0 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.hero-title {
+    font-size: 45px;
+    font-weight: 700;
+    color: white;
+    background-color: #6b1057;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+    font-size: 21px;
+    color: var(--text-gray);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+
+}
+
+/* Main Description - Actualizado */
 .main-description {
-    padding: 60px 0;
+    padding: 30px 0;
     background-color: var(--secondary-beige);
 }
 
@@ -568,9 +587,29 @@ body {
     border-radius: 8px;
     padding: 40px;
     display: flex;
+    flex-direction: column;
+    /* Cambiado */
     gap: 24px;
-    align-items: flex-start;
+    align-items: center;
+    /* NUEVO - centra horizontalmente */
+    text-align: center;
+    /* NUEVO - centra el texto */
     border: 1px solid var(--border-light);
+    margin-bottom: 40px;
+}
+
+.description-content h3 {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+}
+
+.description-content p {
+    font-size: 20px;
+    color: rgb(53, 28, 54);
+    line-height: 1.7;
 }
 
 .description-icon {
@@ -584,26 +623,127 @@ body {
     flex-shrink: 0;
 }
 
-.description-content h3 {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 12px;
-    letter-spacing: -0.01em;
+
+
+/* ============================================
+   NUEVO: Carrusel de imágenes
+   ============================================ */
+.image-carousel {
+    position: relative;
+    /* NUEVO - para posicionar las flechas */
+    overflow: hidden;
+    background-color: var(--white);
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    padding: 20px 0;
 }
 
-.description-content p {
-    font-size: 15px;
-    color: var(--text-gray);
-    line-height: 1.7;
+.carousel-track {
+    display: flex;
+    gap: 20px;
+    animation: scroll 30s linear infinite;
+    transition: transform 0.5s ease;
+    /* NUEVO - para navegación suave */
 }
 
-/* Mission & Vision */
+.carousel-track img {
+    height: 250px;
+    width: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.carousel-track:hover {
+    animation-play-state: paused;
+}
+
+/* NUEVO: Botones de navegación del carrusel */
+.carousel-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(95, 13, 81, 0.7);
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.carousel-nav-btn:hover {
+    background-color: rgba(95, 13, 81, 0.9);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-prev-btn {
+    left: 16px;
+}
+
+.carousel-next-btn {
+    right: 16px;
+}
+
+/* ============================================
+   Mission & Vision - Completamente Rediseñado
+   ============================================ */
 .mission-vision {
-    padding: 60px 0;
+    padding: 30px 0;
     background-color: var(--secondary-beige);
 }
 
+/* NUEVO: Layout en filas con imágenes */
+.mission-vision-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+/* NUEVO: Reverse para invertir orden en Visión */
+.mission-vision-row.reverse {
+    direction: rtl;
+}
+
+.mission-vision-row.reverse>* {
+    direction: ltr;
+}
+
+/* NUEVO: Contenedores de imágenes */
+.mission-images,
+.vision-images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.mission-images img,
+.vision-images img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+}
+
+/* Mantener estilos existentes de card */
 .two-columns {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -615,6 +755,9 @@ body {
     border-radius: 8px;
     padding: 36px;
     border: 1px solid var(--border-light);
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
 }
 
 .card-icon {
@@ -625,11 +768,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.card-content {
+    flex: 1;
 }
 
 .card h3 {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 700;
     color: var(--text-dark);
     margin-bottom: 12px;
@@ -637,14 +784,15 @@ body {
 }
 
 .card p {
-    font-size: 15px;
+    font-size: 18px;
     color: var(--text-gray);
     line-height: 1.7;
 }
 
+
 /* Work Areas */
 .work-areas {
-    padding: 80px 0;
+    padding: 60px 0;
     background-color: var(--white);
     border-top: 1px solid var(--border-light);
 }
@@ -689,15 +837,24 @@ body {
 .area-card {
     background-color: var(--white);
     border-radius: 8px;
-    padding: 32px 24px;
     text-align: center;
     transition: all 0.5s;
     border: 1px solid var(--border-light);
+    overflow: hidden;
+    /* NUEVO - para las imágenes */
 }
 
 .area-card:hover {
     transform: translateY(-20px);
     box-shadow: 0 5px 13px rgba(0, 0, 0, 0.08);
+}
+
+/* NUEVO: Imagen en tarjetas */
+.area-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
 }
 
 .area-icon {
@@ -795,7 +952,7 @@ body {
 
 /* Impact Section */
 .impact {
-    padding: 80px 0;
+    padding: 40px 0;
     background-color: var(--secondary-beige);
 }
 
@@ -839,7 +996,7 @@ body {
 
 /* Contact Section */
 .contact {
-    padding: 80px 0;
+    padding: 50px 0;
     background-color: var(--white);
     border-top: 1px solid var(--border-light);
 }
@@ -851,6 +1008,21 @@ body {
     text-align: center;
     margin-bottom: 8px;
     letter-spacing: -0.02em;
+}
+
+/* NUEVO: Grid con mapa */
+.contact-grid-with-map {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 48px;
+    margin-top: 56px;
+}
+
+/* NUEVO: Contenedor de información */
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
 }
 
 .contact-grid {
@@ -889,6 +1061,14 @@ body {
     font-size: 14px;
     color: var(--text-gray);
     line-height: 1.6;
+}
+
+/* NUEVO: Contenedor del mapa */
+.contact-map {
+    height: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-light);
 }
 
 
@@ -976,13 +1156,13 @@ body {
 /* Footer */
 .footer {
     background-color: var(--white);
-  
-    padding: 60px 0 32px;
+
+    padding: 50px 0 32px;
     border-top: 1px solid var(--border-light);
 }
 
 .footer-grid {
-    
+
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 48px;
@@ -990,7 +1170,7 @@ body {
 }
 
 .footer-col h4 {
- 
+
     font-size: 16px;
     font-weight: 700;
     color: var(--text-dark);
@@ -999,14 +1179,14 @@ body {
 }
 
 .footer-col p {
-   
+
     font-size: 14px;
     color: var(--text-gray);
     line-height: 1.7;
 }
 
 .footer-col ul {
-   
+
     list-style: none;
 }
 
@@ -1080,83 +1260,132 @@ body {
     .container {
         padding: 0 20px;
     }
-    
+
     .nav-wrapper {
         flex-direction: column;
         gap: 16px;
     }
-    
+
     .nav-links {
         gap: 20px;
         font-size: 14px;
     }
-    
+
     .hero-title {
         font-size: 32px;
     }
-    
+
     .hero-home {
         min-height: 500px;
         padding: 80px 0 60px;
     }
-    
+
     .hero-home-title {
         font-size: 48px;
     }
-    
+
     .hero-home-subtitle-main {
         font-size: 24px;
     }
-       
+
     .hero-home-subtitle {
         font-size: 15px;
     }
-    
+
     .btn-hero-primary,
     .btn-hero-secondary {
         padding: 14px 28px;
         font-size: 16px;
     }
-    
+
     .carousel-control {
         width: 40px;
         height: 40px;
     }
-    
+
     .carousel-prev {
         left: 16px;
     }
-    
+
     .carousel-next {
         right: 16px;
     }
-    
+
     .carousel-indicators {
         bottom: 20px;
     }
-    
+
     .carousel-indicator {
         width: 32px;
     }
-    
+
     .carousel-indicator.active {
         width: 48px;
     }
-    
+
+    .carousel-nav-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .carousel-prev-btn {
+        left: 8px;
+    }
+
+    .carousel-next-btn {
+        right: 8px;
+    }
+
+
     .two-columns {
         grid-template-columns: 1fr;
     }
-    
+
     .grid-4 {
         grid-template-columns: 1fr;
     }
-    
+
     .description-card {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .cta-banner h2 {
         font-size: 28px;
+    }
+
+    /* NUEVO: Responsive para carrusel */
+    .carousel-track img {
+        height: 180px;
+    }
+
+    .card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .card-icon {
+        margin: 0 auto;
+    }
+
+    /* NUEVO: Responsive para Mission & Vision */
+    .mission-vision-row,
+    .mission-vision-row.reverse {
+        grid-template-columns: 1fr;
+        direction: ltr;
+    }
+
+    .mission-images img,
+    .vision-images img {
+        height: 200px;
+    }
+
+    /* NUEVO: Responsive para contacto con mapa */
+    .contact-grid-with-map {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-map {
+        height: 300px;
     }
 }

@@ -100,3 +100,4 @@ function actualizarUI() {
     document.getElementById('footer-telefono-extra').textContent = config.telefono || '+52 951 123 4567';
     document.getElementById('year').textContent = new Date().getFullYear();
 }
+

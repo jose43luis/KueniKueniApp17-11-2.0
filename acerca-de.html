@@ -33,7 +33,17 @@
                     <a href="acerca-de.html" class="active">Acerca de</a>
                     <a href="eventos.html">Eventos</a>
                     <a href="noticias.html">Noticias</a>
-                    <a href="donar.html">Donar</a>
+                    <a href="donar.html" class="btn-donate-animated">
+                        <span class="heart-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                    fill="white" />
+                            </svg>
+                        </span>
+                        Donar
+                    </a>
                 </nav>
                 <div class="nav-buttons">
                     <a href="login.html" class="btn-secondary">Iniciar Sesión</a>
@@ -51,7 +61,42 @@
     </section>
 
     <section class="main-description">
+
         <div class="container">
+            <!-- Carrusel de imágenes -->
+            <div class="image-carousel">
+                <!-- Botón anterior -->
+                <button class="carousel-nav-btn carousel-prev-btn" aria-label="Anterior">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="white" />
+                    </svg>
+                </button>
+
+                <div class="carousel-track" id="carouselTrack">
+                    <img src="img_kuenikueni/carr1.jpg" alt="Actividad 1">
+                    <img src="img_kuenikueni/carr2.jpg" alt="Actividad 2">
+                    <img src="img_kuenikueni/carr6.jpg" alt="Actividad 3">
+                    <img src="img_kuenikueni/carr4.jpg" alt="Actividad 4">
+                    <img src="img_kuenikueni/carr5.jpg" alt="Actividad 5">
+                    <img src="img_kuenikueni/visitaHospital.jpeg" alt="Actividad 6">
+                    <img src="img_kuenikueni/arte1.jpeg" alt="Actividad 7">
+                    <!-- Duplicados para efecto infinito -->
+                    <img src="img_kuenikueni/carr1.jpg" alt="Actividad 1">
+                    <img src="img_kuenikueni/carr2.jpg" alt="Actividad 2">
+                    <img src="img_kuenikueni/carr6.jpg" alt="Actividad 3">
+                    <img src="img_kuenikueni/carr4.jpg" alt="Actividad 4">
+                    <img src="img_kuenikueni/carr5.jpg" alt="Actividad 5">
+                    <img src="img_kuenikueni/visitaHospital.jpeg" alt="Actividad 6">
+                    <img src="img_kuenikueni/arte1.jpeg" alt="Actividad 7">
+                </div>
+
+                <!-- Botón siguiente -->
+                <button class="carousel-nav-btn carousel-next-btn" aria-label="Siguiente">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" fill="white" />
+                    </svg>
+                </button>
+            </div>
             <div class="description-card">
                 <div class="description-icon">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,12 +110,17 @@
                     <p id="org-descripcion"></p>
                 </div>
             </div>
+
+
         </div>
     </section>
 
     <section class="mission-vision">
         <div class="container">
-            <div class="two-columns">
+
+
+            <!-- Misión con imagen -->
+            <div class="mission-vision-row">
                 <div class="card">
                     <div class="card-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -78,9 +128,19 @@
                             <path d="M12 6v6l4 4" stroke="#5e0652" stroke-width="2" stroke-linecap="round" />
                         </svg>
                     </div>
-                    <h3>Nuestra Misión</h3>
-                    <p id="org-mision"></p>
+                    <div class="card-content">
+                        <h3>Nuestra Misión</h3>
+                        <p id="org-mision"></p>
+                    </div>
                 </div>
+                <div class="mission-images">
+                    <img src="img_kuenikueni/carr7.jpg" alt="Actividad comunitaria">
+                    <img src="img_kuenikueni/caminataKueni5Km1.jpeg" alt="Caminata Kueni">
+                </div>
+            </div>
+
+            <!-- Visión con imagen -->
+            <div class="mission-vision-row reverse">
                 <div class="card">
                     <div class="card-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -89,8 +149,14 @@
                                 fill="#5e0652" />
                         </svg>
                     </div>
-                    <h3>Nuestra Visión</h3>
-                    <p id="org-vision"></p>
+                    <div class="card-content">
+                        <h3>Nuestra Visión</h3>
+                        <p id="org-vision"></p>
+                    </div>
+                </div>
+                <div class="vision-images">
+                    <img src="img_kuenikueni/Bosque1.jpeg" alt="Comunidad">
+                    <img src="img_kuenikueni/diaMujer.jpeg" alt="Día de la mujer">
                 </div>
             </div>
         </div>
@@ -103,50 +169,66 @@
 
             <div class="grid-4">
                 <div class="area-card">
-                    <div class="area-icon green-bg">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 13h2v8H3v-8zm4-4h2v12H7V9zm4-4h2v16h-2V5zm4 8h2v8h-2v-8zm4-4h2v12h-2V9z"
-                                fill="#0d5f3a" />
-                        </svg>
+                    <img src="img_kuenikueni/Bosque1.jpeg" alt="Medio Ambiente" class="area-card-image">
+                    <div class="area-card-content">
+                        <div class="area-icon green-bg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 13h2v8H3v-8zm4-4h2v12H7V9zm4-4h2v16h-2V5zm4 8h2v8h-2v-8zm4-4h2v12h-2V9z"
+                                    fill="#0d5f3a" />
+                            </svg>
+                        </div>
+                        <h3>Medio Ambiente</h3>
+                        <p>Proyectos de reforestación, conservación de recursos naturales y educación ambiental.</p>
                     </div>
-                    <h3>Medio Ambiente</h3>
-                    <p>Proyectos de reforestación, conservación de recursos naturales y educación ambiental.</p>
                 </div>
 
                 <div class="area-card">
-                    <div class="area-icon blue-bg">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
-                                fill="#3b82f6" />
-                        </svg>
+                    <img src="img_kuenikueni/deporte.jpg" alt="Deporte y Recreación" class="area-card-image">
+                    <div class="area-card-content">
+                        <div class="area-icon blue-bg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+                                    fill="#3b82f6" />
+                            </svg>
+                        </div>
+                        <h3>Deporte y Recreación</h3>
+                        <p>Torneos deportivos, actividades recreativas y programas de activación física.</p>
                     </div>
-                    <h3>Deporte y Recreación</h3>
-                    <p>Torneos deportivos, actividades recreativas y programas de activación física.</p>
                 </div>
 
                 <div class="area-card">
-                    <div class="area-icon purple-bg">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                                fill="#a855f7" />
-                        </svg>
+                    <img src="img_kuenikueni/arte.jpg" alt="Cultura y Tradiciones" class="area-card-image">
+                    <div class="area-card-content">
+                        <div class="area-icon purple-bg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                    fill="#a855f7" />
+                            </svg>
+                        </div>
+                        <h3>Cultura y Tradiciones</h3>
+                        <p>Talleres de artesanías tradicionales y eventos culturales.</p>
                     </div>
-                    <h3>Cultura y Tradiciones</h3>
-                    <p>Talleres de artesanías tradicionales y eventos culturales.</p>
                 </div>
 
                 <div class="area-card">
-                    <div class="area-icon orange-bg">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"
-                                fill="#f97316" />
-                        </svg>
+                    <img src="img_kuenikueni/tallerArtesania1.jpeg" alt="Emprendimiento" class="area-card-image">
+                    <div class="area-card-content">
+                        <div class="area-icon orange-bg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"
+                                    fill="#f97316" />
+                            </svg>
+                        </div>
+                        <h3>Emprendimiento</h3>
+                        <p>Capacitaciones y apoyo para proyectos productivos.</p>
                     </div>
-                    <h3>Emprendimiento</h3>
-                    <p>Capacitaciones y apoyo para proyectos productivos.</p>
                 </div>
             </div>
         </div>
@@ -184,47 +266,60 @@
             <h2>Información de Contacto</h2>
             <p class="section-subtitle">Encuéntranos y comunícate con nosotros</p>
 
-            <div class="contact-grid">
-                <div class="contact-item">
-                    <div class="contact-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                                fill="#5e0652" />
-                        </svg>
+            <div class="contact-grid-with-map">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                                    fill="#5e0652" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Dirección</h3>
+                            <p id="contact-direccion">--</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3>Dirección</h3>
-                        <p id="contact-direccion">--</p>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                                    fill="#5e0652" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Correo Electrónico</h3>
+                            <p id="contact-email">--</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"
+                                    fill="#5e0652" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Teléfono</h3>
+                            <p id="contact-telefono">--</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="contact-item">
-                    <div class="contact-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-                                fill="#5e0652" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3>Correo Electrónico</h3>
-                        <p id="contact-email">--</p>
-                    </div>
-                </div>
-
-                <div class="contact-item">
-                    <div class="contact-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"
-                                fill="#5e0652" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3>Teléfono</h3>
-                        <p id="contact-telefono">--</p>
-                    </div>
+                <div class="contact-map">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d940.4422834782324!2d-97.22897483648295!3d17.456396294698657!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85c65c8f38aa173b%3A0x1973afbc3f5c3155!2sAbasolo%2027%2C%20Las%20Flores%2C%2069600%20Asunci%C3%B3n%20Nochixtl%C3%A1n%2C%20Oax.!5e0!3m2!1ses!2smx!4v1234567890123!5m2!1ses!2smx"
+                        width="100%" height="100%" style="border:0; border-radius: 8px;" allowfullscreen=""
+                        loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
                 </div>
             </div>
         </div>
@@ -241,19 +336,26 @@
         </div>
     </section>
 
+
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <h4 id="footer-nombre"></h4>
-                    <p id="footer-descripcion"></p>
+                    <h4>Kueni Kueni</h4>
+                    <p>Asociación Civil sin fines de lucro dedicada al desarrollo integral de la región Mixteca.</p>
+
                 </div>
                 <div class="footer-col">
+                    <h4>Ubicación</h4>
+                    <p>Abasolo 27, Barrio las Flores<br>Asunción Nochixtlán, Oaxaca<br>México</p>
+                    <br>
                     <h4>Contacto</h4>
-                    <p id="footer-direccion">--</p>
-                    <p id="footer-email-extra">--</p>
-                    <p id="footer-telefono-extra">--</p>
+                    <p>kuenikuenicolectivo@gmail.com<br>+52 951 244 09 01</p>
+
+
                 </div>
+
                 <div class="footer-col">
                     <h4>Enlaces</h4>
                     <ul>
@@ -263,15 +365,109 @@
                         <li><a href="donar.html">Donar</a></li>
                     </ul>
                 </div>
+                <div class="footer-social">
+                    <h4>Síguenos</h4>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/cuenicuenicolectivo" target="_blank" rel="noopener noreferrer"
+                            aria-label="Facebook">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                                    fill="#5f0d51" />
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com/kueni.kuenicolectivo?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                            target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"
+                                    fill="#5f0d51" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
             </div>
             <div class="footer-bottom">
-                <p>© <span id="year"></span> <span id="footer-nombre-copy"></span>. Todos los derechos reservados.</p>
+                <p>© 2025 Kueni Kueni. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
 
+
+
     <script src="javaScript/supabase-config.js"></script>
     <script src="javaScript/acerca-de.js"></script>
 </body>
+<script>
+    // Control del carrusel de imágenes
+    document.addEventListener('DOMContentLoaded', function () {
+        const carouselTrack = document.getElementById('carouselTrack');
+        const prevBtn = document.querySelector('.carousel-prev-btn');
+        const nextBtn = document.querySelector('.carousel-next-btn');
+
+        if (carouselTrack && prevBtn && nextBtn) {
+            let currentIndex = 0;
+            let isAnimating = false;
+            const images = carouselTrack.querySelectorAll('img');
+            const totalImages = 5;
+            const imageWidth = 270; // Ancho de imagen + gap (250px + 20px)
+
+            // Pausar animación al interactuar
+            function pauseAnimation() {
+                carouselTrack.style.animation = 'none';
+            }
+            carouselTrack.style.transition = 'transform 0.5s ease';
+            if (isAnimating) return;
+            // Reanudar animación
+            function resumeAnimation() {
+                carouselTrack.style.animationPlayState = 'running';
+            }
+
+            function updateCarousel() {
+                const offset = -currentIndex * imageWidth;
+                carouselTrack.style.transform = `translateX(${offset}px)`;
+            }
+
+            // Botón siguiente
+            nextBtn.addEventListener('click', function () {
+                pauseAnimation();
+                currentIndex++;
+
+                // Si llegamos al final de las imágenes originales, reiniciamos
+                if (currentIndex >= totalImages) {
+                    currentIndex = 0;
+                }
+
+                updateCarousel();
+
+                // Reanudar después de 3 segundos
+                setTimeout(resumeAnimation, 5000);
+            });
+
+            carouselTrack.addEventListener('mouseenter', function () { stopAnimation(); });
+
+            // Botón anterior
+            prevBtn.addEventListener('click', function () {
+                pauseAnimation();
+                currentIndex--;
+
+                // Si vamos antes del inicio, vamos al final
+                if (currentIndex < 0) {
+                    currentIndex = totalImages - 1;
+                }
+
+                updateCarousel();
+
+                // Reanudar después de 3 segundos
+                setTimeout(resumeAnimation, 3000);
+            });
+        }
+    });
+</script>
+
+<script src="javaScript/supabase-config.js"></script>
+<script src="javaScript/acerca-de.js"></script>
 
 </html>
