@@ -1,5 +1,7 @@
 // registro.js - Sistema de registro con validaciones completas
 
+const EMAIL_SERVER_URL = 'http://localhost:3000';
+
 document.addEventListener('DOMContentLoaded', function() {
     const registroForm = document.getElementById('registroForm');
     const nombreInput = document.getElementById('nombreCompleto');
@@ -292,7 +294,7 @@ async function procesarRegistro() {
             throw errorUsuario;
         }
         
-        console.log('Usuario creado:', nuevoUsuario.email);
+        console.log('✅ Usuario creado:', nuevoUsuario.email);
         
         // Si es socio, crear registro en tabla socios
         if (tipoUsuario === 'socio') {
@@ -311,14 +313,37 @@ async function procesarRegistro() {
             if (errorSocio) {
                 console.error('Error al crear socio:', errorSocio);
             } else {
-                console.log('Socio creado exitosamente');
+                console.log('✅ Socio creado exitosamente');
             }
         }
         
-        mostrarMensaje(`¡Cuenta de ${tipoUsuario} creada exitosamente!`, 'success');
+        // Enviar correo de bienvenida
+        try {
+            console.log('📧 Enviando correo de bienvenida...');
+            const emailResponse = await fetch(`${EMAIL_SERVER_URL}/send-welcome-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: nuevoUsuario.email,
+                    nombre: nuevoUsuario.nombre_completo
+                })
+            });
+            
+            if (emailResponse.ok) {
+                console.log('✅ Correo de bienvenida enviado');
+            } else {
+                console.log('⚠️ No se pudo enviar correo (no crítico)');
+            }
+        } catch (emailError) {
+            console.log('⚠️ Error al enviar correo (no crítico):', emailError);
+        }
+        
+        mostrarMensaje(`¡Cuenta de ${tipoUsuario} creada exitosamente! Revisa tu correo.`, 'success');
         
         // Limpiar formulario
         document.getElementById('registroForm').reset();
+        document.getElementById('passwordRequirements').style.display = 'none';
+        document.getElementById('passwordStrength').style.display = 'none';
         
         // Redirigir al login después de 2 segundos
         setTimeout(() => {
@@ -326,7 +351,7 @@ async function procesarRegistro() {
         }, 2000);
         
     } catch (error) {
-        console.error('Error en registro:', error);
+        console.error('❌ Error en registro:', error);
         mostrarMensaje('Error al crear la cuenta. Por favor intenta de nuevo.', 'error');
     } finally {
         registroBtn.disabled = false;
@@ -397,6 +422,50 @@ style.textContent = `
         background: #d1fae5;
         color: #065f46;
         border: 1px solid #a7f3d0;
+    }
+    
+    .requirement {
+        font-size: 0.875rem;
+        padding: 4px 0;
+    }
+    
+    .requirement.valid {
+        color: #059669;
+    }
+    
+    .requirement.valid::before {
+        content: '✓ ';
+    }
+    
+    .requirement.invalid {
+        color: #dc2626;
+    }
+    
+    .requirement.invalid::before {
+        content: '✗ ';
+    }
+    
+    .password-strength {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .strength-weak {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .strength-medium {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    .strength-strong {
+        background: #d1fae5;
+        color: #059669;
     }
 `;
 document.head.appendChild(style);
