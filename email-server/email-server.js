@@ -76,8 +76,8 @@ console.log('📧 Remitente:', BREVO_SENDER_EMAIL);
 // RUTA DE SALUD DEL SERVIDOR
 // ===================================================
 app.get('/', (req, res) => {
-    res.json({ 
-        status: 'OK', 
+    res.json({
+        status: 'OK',
         message: 'Servidor de correos Kueni Kueni funcionando con Brevo API',
         timestamp: new Date().toISOString()
     });
@@ -91,8 +91,8 @@ app.post('/send-recovery-email', async (req, res) => {
         const { email } = req.body;
 
         if (!email) {
-            return res.status(400).json({ 
-                error: 'El correo electrónico es requerido' 
+            return res.status(400).json({
+                error: 'El correo electrónico es requerido'
             });
         }
 
@@ -108,8 +108,8 @@ app.post('/send-recovery-email', async (req, res) => {
 
         if (dbError || !usuario) {
             console.log('❌ Usuario no encontrado:', email);
-            return res.status(404).json({ 
-                error: 'No existe una cuenta con este correo electrónico' 
+            return res.status(404).json({
+                error: 'No existe una cuenta con este correo electrónico'
             });
         }
 
@@ -267,23 +267,23 @@ app.post('/send-recovery-email', async (req, res) => {
         );
 
         if (resultado.success) {
-            res.json({ 
+            res.json({
                 success: true,
                 message: 'Correo de recuperación enviado exitosamente',
                 email: usuario.email
             });
         } else {
-            res.status(500).json({ 
+            res.status(500).json({
                 error: 'Error al enviar el correo',
-                details: resultado.error 
+                details: resultado.error
             });
         }
 
     } catch (error) {
         console.error('❌ Error general:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Error al procesar la solicitud',
-            details: error.message 
+            details: error.message
         });
     }
 });
@@ -296,8 +296,8 @@ app.post('/send-welcome-email', async (req, res) => {
         const { email, nombre } = req.body;
 
         if (!email || !nombre) {
-            return res.status(400).json({ 
-                error: 'Email y nombre son requeridos' 
+            return res.status(400).json({
+                error: 'Email y nombre son requeridos'
             });
         }
 
@@ -353,22 +353,22 @@ app.post('/send-welcome-email', async (req, res) => {
         );
 
         if (resultado.success) {
-            res.json({ 
+            res.json({
                 success: true,
                 message: 'Correo de bienvenida enviado'
             });
         } else {
-            res.status(500).json({ 
+            res.status(500).json({
                 error: 'Error al enviar correo de bienvenida',
-                details: resultado.error 
+                details: resultado.error
             });
         }
 
     } catch (error) {
         console.error('❌ Error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Error al enviar correo de bienvenida',
-            details: error.message 
+            details: error.message
         });
     }
 });
@@ -379,7 +379,7 @@ app.post('/send-welcome-email', async (req, res) => {
 app.post('/send-donation-thank-you', async (req, res) => {
     const { email, nombre, monto, moneda, referencia, destino, fecha } = req.body;
 
-    console.log('📧 Solicitud de correo de agradecimiento:', { email, nombre, monto });
+    console.log('Solicitud de correo de agradecimiento:', { email, nombre, monto });
 
     try {
         const contenidoHTML = `
@@ -519,6 +519,18 @@ app.post('/send-donation-thank-you', async (req, res) => {
                         border-radius: 6px;
                         margin: 20px 0;
                         font-weight: 600;
+
+                        
+                    .logo-icon-circle {
+                        width: 56px;
+                        height: 56px;
+                        background: linear-gradient(135deg, #5f0d51 0%, #4d094d 100%);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 4px 12px rgba(95, 13, 81, 0.3);
+                    }
                     }
                 </style>
             </head>
@@ -530,7 +542,15 @@ app.post('/send-donation-thank-you', async (req, res) => {
                     </div>
                     
                     <div class="content">
-                        <div class="heart-icon">❤️</div>
+                        <div class="heart-icon">
+                        
+                        <div class="logo-icon-circle">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="white"/>
+                        </svg>
+                         </div>
+                        
+                        </div>
                         
                         <div class="thank-you">
                             ¡Gracias por tu generosidad, ${nombre}!
@@ -568,17 +588,17 @@ app.post('/send-donation-thank-you', async (req, res) => {
                             <h3>Tu impacto en la comunidad</h3>
                             <p>Con tu donación estás apoyando:</p>
                             <ul class="impact-list">
-                                <li>Programas de desarrollo comunitario</li>
-                                <li>Apoyo a familias vulnerables</li>
-                                <li>Preservación de tradiciones culturales</li>
-                                <li>Iniciativas de desarrollo sostenible</li>
+                                <li> ✓ Programas de desarrollo comunitario</li>
+                                <li> ✓ Apoyo a familias vulnerables</li>
+                                <li> ✓ Preservación de tradiciones culturales</li>
+                                <li> ✓ Iniciativas de desarrollo sostenible</li>
                             </ul>
                         </div>
                         
                         <p style="text-align: center; color: #666; font-size: 14px; margin-top: 30px;">
                             Guarda este correo como comprobante de tu donación.<br>
                             Si tienes alguna pregunta, contáctanos en:<br>
-                            <strong>kuenikuenicolectivo@gmail.com</strong>
+                            <strong>kuenikueni.contacto@gmail.com</strong>
                         </p>
                     </div>
                     
@@ -610,25 +630,25 @@ app.post('/send-donation-thank-you', async (req, res) => {
 
         if (resultado.success) {
             console.log(`✅ Correo de agradecimiento enviado a: ${email}`);
-            res.json({ 
-                success: true, 
+            res.json({
+                success: true,
                 message: 'Correo de agradecimiento enviado',
-                messageId: resultado.messageId 
+                messageId: resultado.messageId
             });
         } else {
             console.error('❌ Error al enviar correo:', resultado.error);
-            res.status(500).json({ 
-                success: false, 
+            res.status(500).json({
+                success: false,
                 error: 'Error al enviar correo de agradecimiento',
-                details: resultado.error 
+                details: resultado.error
             });
         }
 
     } catch (error) {
         console.error('❌ Error al procesar correo de agradecimiento:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            error: error.message
         });
     }
 });
@@ -637,20 +657,20 @@ app.post('/send-donation-thank-you', async (req, res) => {
 // ENVIAR NOTIFICACIÓN AL ADMINISTRADOR
 // ===================================================
 app.post('/send-donation-notification', async (req, res) => {
-    const { 
-        donante_nombre, 
-        donante_email, 
+    const {
+        donante_nombre,
+        donante_email,
         donante_telefono,
-        monto, 
-        moneda, 
-        referencia, 
-        destino, 
+        monto,
+        moneda,
+        referencia,
+        destino,
         fecha,
         metodo_pago,
         mensaje
     } = req.body;
 
-    console.log('📬 Solicitud de notificación al administrador:', { donante_nombre, monto });
+    console.log('Solicitud de notificación al administrador:', { donante_nombre, monto });
 
     try {
         const contenidoHTML = `
@@ -829,7 +849,7 @@ app.post('/send-donation-notification', async (req, res) => {
         `;
 
         // Correo del administrador
-        const adminEmail = 'kuenikuenicolectivo@gmail.com';
+        const adminEmail = 'kuenikueni.contacto@gmail.com';
 
         // USAR LA FUNCIÓN enviarCorreoBrevo() QUE YA TIENES
         const resultado = await enviarCorreoBrevo(
@@ -840,29 +860,29 @@ app.post('/send-donation-notification', async (req, res) => {
 
         if (resultado.success) {
             console.log(`✅ Notificación enviada al administrador: ${adminEmail}`);
-            res.json({ 
-                success: true, 
+            res.json({
+                success: true,
                 message: 'Notificación enviada al administrador',
-                messageId: resultado.messageId 
+                messageId: resultado.messageId
             });
         } else {
             console.error('❌ Error al enviar notificación:', resultado.error);
-            res.status(500).json({ 
-                success: false, 
+            res.status(500).json({
+                success: false,
                 error: 'Error al enviar notificación',
-                details: resultado.error 
+                details: resultado.error
             });
         }
 
     } catch (error) {
         console.error('❌ Error al procesar notificación:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            error: error.message
         });
     }
 });
-      
+
 
 
 // ===================================================
