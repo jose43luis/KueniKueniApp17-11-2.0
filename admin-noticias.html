@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Noticias - Kueni Kueni</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- CSS Comunes Admin -->
+    <link rel="stylesheet" href="styles/admin-sidebar.css">
+    <link rel="stylesheet" href="styles/admin-common.css">
     <link rel="stylesheet" href="styles/admin-noticias.css">
 </head>
 <body>
@@ -167,6 +170,36 @@
                 </thead>
                 <tbody id="tablaNoticias"></tbody>
             </table>
+        </div>
+        
+        <!-- PAGINACIÓN -->
+        <div class="pagination">
+            <button id="btnPrevNoticias" class="btn-page" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Anterior
+            </button>
+            
+            <span class="pagination-info">
+                Página <span id="paginaActualNoticias">1</span> de <span id="totalPaginasNoticias">1</span>
+            </span>
+            
+            <button id="btnNextNoticias" class="btn-page">
+                Siguiente
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            
+            <div class="pagination-size">
+                <label for="selectItemsPorPaginaNoticias">Mostrar:</label>
+                <select id="selectItemsPorPaginaNoticias">
+                    <option value="10" selected>10 por página</option>
+                    <option value="20">20 por página</option>
+                    <option value="50">50 por página</option>
+                </select>
+            </div>
         </div>
     </main>
 

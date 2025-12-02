@@ -14,9 +14,50 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
     
     configurarEventos();
+    configurarPaginacion();
 });
 
+// ================= CONFIGURACIÓN DE PAGINACIÓN =================
+
+function configurarPaginacion() {
+    document.getElementById('btnPrevNoticias')?.addEventListener('click', () => cambiarPaginaNoticias(-1));
+    document.getElementById('btnNextNoticias')?.addEventListener('click', () => cambiarPaginaNoticias(1));
+    document.getElementById('selectItemsPorPaginaNoticias')?.addEventListener('change', (e) => {
+        itemsPorPaginaNoticias = parseInt(e.target.value) || 10;
+        paginaActualNoticias = 1;
+        filtrarNoticias();
+    });
+}
+
+function cambiarPaginaNoticias(delta) {
+    const total = calcularTotalPaginasNoticias();
+    paginaActualNoticias += delta;
+    if (paginaActualNoticias < 1) paginaActualNoticias = 1;
+    if (paginaActualNoticias > total) paginaActualNoticias = total;
+    mostrarNoticiasPaginadas();
+    actualizarPaginacionNoticias();
+}
+
+function calcularTotalPaginasNoticias() {
+    return Math.max(1, Math.ceil(noticiasFiltradas.length / itemsPorPaginaNoticias));
+}
+
+function actualizarPaginacionNoticias() {
+    const total = calcularTotalPaginasNoticias();
+    document.getElementById('paginaActualNoticias').textContent = String(paginaActualNoticias);
+    document.getElementById('totalPaginasNoticias').textContent = String(total);
+    
+    const btnPrev = document.getElementById('btnPrevNoticias');
+    const btnNext = document.getElementById('btnNextNoticias');
+    
+    if (btnPrev) btnPrev.disabled = paginaActualNoticias <= 1;
+    if (btnNext) btnNext.disabled = paginaActualNoticias >= total;
+}
+
 let noticiasGlobal = [];
+let noticiasFiltradas = [];
+let paginaActualNoticias = 1;
+let itemsPorPaginaNoticias = 10;
 
 function verificarAutenticacion() {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
@@ -86,7 +127,10 @@ async function cargarNoticias() {
         if (error) throw error;
         
         noticiasGlobal = noticias || [];
-        mostrarNoticias(noticias || []);
+        noticiasFiltradas = noticias || [];
+        paginaActualNoticias = 1;
+        mostrarNoticiasPaginadas();
+        actualizarPaginacionNoticias();
         
         console.log(`${noticias?.length || 0} noticias cargadas`);
     } catch (error) {
@@ -94,16 +138,21 @@ async function cargarNoticias() {
     }
 }
 
-function mostrarNoticias(noticias) {
+function mostrarNoticiasPaginadas() {
     const tbody = document.getElementById('tablaNoticias');
     if (!tbody) return;
     
-    if (!noticias || noticias.length === 0) {
+    if (!noticiasFiltradas || noticiasFiltradas.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;">No hay noticias</td></tr>';
         return;
     }
     
-    tbody.innerHTML = noticias.map(noticia => {
+    // Calcular noticias a mostrar
+    const inicio = (paginaActualNoticias - 1) * itemsPorPaginaNoticias;
+    const fin = inicio + itemsPorPaginaNoticias;
+    const noticiasPagina = noticiasFiltradas.slice(inicio, fin);
+    
+    tbody.innerHTML = noticiasPagina.map(noticia => {
         const estadoBadge = obtenerEstadoBadge(noticia.estado);
         const categoriaBadge = obtenerCategoriaBadge(noticia.categoria);
         
@@ -167,7 +216,15 @@ function filtrarNoticias() {
         filtradas = filtradas.filter(n => n.categoria === categoria);
     }
     
-    mostrarNoticias(filtradas);
+    noticiasFiltradas = filtradas;
+    
+    // Ajustar página actual si es necesario
+    const totalPaginas = calcularTotalPaginasNoticias();
+    if (paginaActualNoticias > totalPaginas) paginaActualNoticias = totalPaginas;
+    if (paginaActualNoticias < 1) paginaActualNoticias = 1;
+    
+    mostrarNoticiasPaginadas();
+    actualizarPaginacionNoticias();
 }
 
 async function verDetalleNoticia(id) {
