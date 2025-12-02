@@ -1,32 +1,59 @@
-/* === SER SOCIO PAGE === */
+/* ============================================
+   SER SOCIO - DISEÑO MODERNO MEJORADO
+   ============================================ */
 
+/* === HERO SECTION === */
 .socio-hero {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(95, 13, 81, 0.1);
 }
 
 .socio-hero h1 {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 2.25rem;
+    font-weight: 700;
     color: #18181b;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.75rem 0;
+    letter-spacing: -0.5px;
 }
 
 .hero-subtitle {
     font-size: 1.125rem;
     color: #71717a;
     margin: 0;
+    font-weight: 400;
 }
 
 /* === BANNER DESTACADO === */
 .destacado-banner {
-    background: linear-gradient(135deg, #5f0d54 0%, #801560 100%);
+    background: linear-gradient(135deg, #6b1560 0%, #5f0d51 100%);
     border-radius: 16px;
-    padding: 2rem;
+    padding: 2.5rem;
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 2rem;
     margin-bottom: 3rem;
+    box-shadow: 0 8px 24px rgba(95, 13, 81, 0.25);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.destacado-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.destacado-banner:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(95, 13, 81, 0.35);
 }
 
 .destacado-icon {
@@ -38,13 +65,23 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+    z-index: 1;
+}
+
+.destacado-content {
+    position: relative;
+    z-index: 1;
 }
 
 .destacado-content h2 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: white;
     margin: 0 0 0.75rem 0;
+    letter-spacing: -0.3px;
 }
 
 .destacado-content p {
@@ -60,10 +97,11 @@
 }
 
 .beneficios-section h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 700;
     color: #18181b;
     margin: 0 0 2rem 0;
+    letter-spacing: -0.5px;
 }
 
 .beneficios-grid {
@@ -75,58 +113,83 @@
 .beneficio-card {
     background: white;
     border: 1px solid #e4e4e7;
-    border-radius: 12px;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.beneficio-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #6b1560, #5f0d51);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.beneficio-card:hover::before {
+    transform: scaleX(1);
 }
 
 .beneficio-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-6px);
+    border-color: rgba(95, 13, 81, 0.3);
 }
 
 .beneficio-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    transition: transform 0.3s ease;
+}
+
+.beneficio-card:hover .beneficio-icon {
+    transform: scale(1.1) rotate(5deg);
 }
 
 .beneficio-icon.eventos {
-    background: #dbeafe;
-    color: #1e40af;
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
 }
 
 .beneficio-icon.voz {
-    background: #e9d5ff;
+    background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
     color: #7c3aed;
 }
 
 .beneficio-icon.impacto {
-    background: #fee2e2;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
     color: #dc2626;
 }
 
 .beneficio-icon.reconocimiento {
-    background: #fef3c7;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
     color: #ca8a04;
 }
 
 .beneficio-card h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 700;
     color: #18181b;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.75rem 0;
+    letter-spacing: -0.3px;
 }
 
 .beneficio-card p {
     font-size: 0.9375rem;
     color: #71717a;
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 /* === REQUISITOS === */
@@ -135,23 +198,25 @@
 }
 
 .requisitos-card {
-    background: #fafafa;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
     border: 1px solid #e4e4e7;
-    border-radius: 12px;
-    padding: 2rem;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .requisitos-card h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #18181b;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.75rem 0;
+    letter-spacing: -0.3px;
 }
 
 .requisitos-intro {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     color: #71717a;
-    margin: 0 0 1.5rem 0;
+    margin: 0 0 2rem 0;
 }
 
 .requisitos-list {
@@ -166,117 +231,22 @@
 .requisitos-list li {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    font-size: 0.9375rem;
+    gap: 1rem;
+    font-size: 1rem;
     color: #18181b;
-}
-
-/* === MEMBRESÍAS === */
-.membresias-section {
-    margin-bottom: 3rem;
-}
-
-.membresias-section h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #18181b;
-    margin: 0 0 2rem 0;
-}
-
-.membresias-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-}
-
-.membresia-card {
+    padding: 1rem;
     background: white;
-    border: 2px solid #e4e4e7;
-    border-radius: 16px;
-    padding: 2rem;
-    transition: all 0.3s ease;
-    position: relative;
+    border-radius: 10px;
+    transition: all 0.2s ease;
 }
 
-.membresia-card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    transform: translateY(-6px);
+.requisitos-list li:hover {
+    background: #fafafa;
+    transform: translateX(8px);
 }
 
-.membresia-card.destacada {
-    border-color: #5f0d51;
-    background: linear-gradient(to bottom, rgba(13, 95, 58, 0.02) 0%, white 100%);
-}
-
-.membresia-badge {
-    display: inline-block;
-    padding: 0.375rem 0.875rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.membresia-badge.activa {
-    background: #fad1f6;
-    color: #5f0d51;
-}
-
-.membresia-badge.fundador {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.membresia-card h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #18181b;
-    margin: 0 0 0.5rem 0;
-}
-
-.membresia-descripcion {
-    font-size: 0.9375rem;
-    color: #71717a;
-    margin: 0 0 1.5rem 0;
-}
-
-.precio-container {
-    padding: 1.5rem 0;
-    border-top: 1px solid #f4f4f5;
-    border-bottom: 1px solid #f4f4f5;
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-}
-
-.precio {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #5f0d51;
-    line-height: 1;
-    margin-bottom: 0.25rem;
-}
-
-.precio-periodo {
-    font-size: 0.875rem;
-    color: #71717a;
-}
-
-.membresia-beneficios {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.membresia-beneficios li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.9375rem;
-    color: #52525b;
+.requisitos-list li svg {
+    flex-shrink: 0;
 }
 
 /* === CTA FINAL === */
@@ -284,72 +254,340 @@
     background: white;
     border: 2px solid #e4e4e7;
     border-radius: 16px;
-    padding: 3rem 2rem;
+    padding: 3rem 2.5rem;
     text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .cta-final h2 {
-    font-size: 1.75rem;
-    font-weight: 600;
+    font-size: 2rem;
+    font-weight: 700;
     color: #18181b;
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.5px;
 }
 
-.cta-final p {
-    font-size: 1rem;
+.cta-final > p {
+    font-size: 1.125rem;
     color: #71717a;
     margin: 0 0 2rem 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.btn-solicitar {
+.btn-convertir-socio {
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem 2.5rem;
-    background: #5f0d51;
+    padding: 1.25rem 3rem;
+    background: linear-gradient(135deg, #6b1560 0%, #5f0d51 100%);
     color: white;
     border: none;
+    border-radius: 12px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(95, 13, 81, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-convertir-socio::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-convertir-socio:hover::before {
+    left: 100%;
+}
+
+.btn-convertir-socio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(95, 13, 81, 0.4);
+}
+
+.btn-convertir-socio:active {
+    transform: translateY(0);
+}
+
+.btn-convertir-socio:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* === MODAL === */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    max-width: 540px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 1px solid #e4e4e7;
+}
+
+.modal-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #18181b;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-warning-box {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.warning-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #92400e;
+    margin: 0 0 0.75rem 0;
+}
+
+.warning-text {
+    font-size: 0.9375rem;
+    color: #78350f;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.modal-question {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #18181b;
+    margin: 0;
+    text-align: center;
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    border-top: 1px solid #e4e4e7;
+}
+
+.btn-cancelar {
+    padding: 0.875rem 2rem;
+    background: white;
+    color: #52525b;
+    border: 1px solid #e4e4e7;
     border-radius: 10px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
-.btn-solicitar:hover {
-    background: #6b0b5b;
+.btn-cancelar:hover {
+    background: #f4f4f5;
+    border-color: #d4d4d8;
+}
+
+.btn-confirmar {
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, #6b1560 0%, #5f0d51 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(95, 13, 81, 0.3);
+}
+
+.btn-confirmar:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(95, 13, 81, 0.3);
+    box-shadow: 0 4px 12px rgba(95, 13, 81, 0.4);
+}
+
+.btn-confirmar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-confirmar .btn-loader {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loader {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 /* === RESPONSIVE === */
 @media (max-width: 1024px) {
-    .beneficios-grid,
-    .membresias-grid {
+    .beneficios-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .destacado-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .destacado-content h2 {
+        font-size: 1.5rem;
     }
 }
 
 @media (max-width: 768px) {
+    .socio-hero h1 {
+        font-size: 1.75rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
     .destacado-banner {
-        flex-direction: column;
-        text-align: center;
         padding: 1.5rem;
+    }
+    
+    .beneficio-card,
+    .requisitos-card,
+    .cta-final {
+        padding: 1.5rem;
+    }
+    
+    .cta-final h2 {
+        font-size: 1.5rem;
+    }
+    
+    .btn-convertir-socio {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        width: 95%;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1.5rem;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .btn-cancelar,
+    .btn-confirmar {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .socio-hero h1 {
+        font-size: 1.5rem;
     }
     
     .destacado-content h2 {
         font-size: 1.25rem;
     }
     
-    .socio-hero h1 {
-        font-size: 1.75rem;
-    }
-    
-    .cta-final {
-        padding: 2rem 1.5rem;
-    }
-    
-    .cta-final h2 {
+    .beneficios-section h2 {
         font-size: 1.5rem;
     }
 }

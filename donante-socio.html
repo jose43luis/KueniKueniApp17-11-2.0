@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ser Socio - Kueni Kueni</title>
+    
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/donante-dashboard.css">
     <link rel="stylesheet" href="styles/donante-socio.css">
@@ -56,7 +60,7 @@
             </a>
         </nav>
 
-        <button class="logout-btn">
+        <button class="logout-btn" id="logoutBtn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor"/>
             </svg>
@@ -69,7 +73,7 @@
         <!-- Hero Section -->
         <section class="socio-hero">
             <h1>Conviértete en Socio</h1>
-            <p class="hero-subtitle">Únete a nuestra comunidad y sé parte del cambio</p>
+            <p class="hero-subtitle">Da el siguiente paso y sé parte activa del cambio</p>
         </section>
 
         <!-- Banner Destacado -->
@@ -167,110 +171,59 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#5f0d51"/>
                         </svg>
-                        <span>Contribución anual de membresía</span>
+                        <span>Deseo genuino de contribuir al cambio social</span>
                     </li>
                 </ul>
-            </div>
-        </section>
-
-        <!-- Tipos de Membresía -->
-        <section class="membresias-section">
-            <h2>Tipos de Membresía</h2>
-            
-            <div class="membresias-grid">
-                <!-- Membresía Anual -->
-                <div class="membresia-card">
-                    <span class="membresia-badge activa">Socio Activo</span>
-                    <h3>Membresía Anual</h3>
-                    <p class="membresia-descripcion">Participación completa en todas las actividades</p>
-                    
-                    <div class="precio-container">
-                        <span class="precio">$500</span>
-                        <span class="precio-periodo">MXN por año</span>
-                    </div>
-                    
-                    <ul class="membresia-beneficios">
-                        <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#5f0d51"/>
-                            </svg>
-                            <span>Acceso a todos los eventos</span>
-                        </li>
-                        <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#5f0d51"/>
-                            </svg>
-                            <span>Derecho a voto en asambleas</span>
-                        </li>
-                        <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#5f0d51"/>
-                            </svg>
-                            <span>Certificado de membresía</span>
-                        </li>
-                        <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#5f0d51"/>
-                            </svg>
-                            <span>Boletín mensual exclusivo</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Membresía Vitalicia -->
-                <div class="membresia-card destacada">
-                    <span class="membresia-badge fundador">Socio Fundador</span>
-                    <h3>Membresía Vitalicia</h3>
-                    <p class="membresia-descripcion">Apoyo permanente con beneficios especiales</p>
-                    
-                    <div class="precio-container">
-                        <span class="precio">$5,000</span>
-                        <span class="precio-periodo">MXN pago único</span>
-                    </div>
-                    
-                    <ul class="membresia-beneficios">
-                        <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#5f0d51"/>
-                            </svg>
-                            <span>Todos los beneficios de Socio Activo</span>
-                        </li>
-                        <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#5f0d51"/>
-                            </svg>
-                            <span>Reconocimiento especial</span>
-                        </li>
-                        <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#5f0d51"/>
-                            </svg>
-                            <span>Placa conmemorativa</span>
-                        </li>
-                        <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#5f0d51"/>
-                            </svg>
-                            <span>Prioridad en eventos</span>
-                        </li>
-                    </ul>
-                </div>
             </div>
         </section>
 
         <!-- CTA Final -->
         <section class="cta-final">
             <h2>¿Listo para Unirte?</h2>
-            <p>Completa tu solicitud y nuestro equipo se pondrá en contacto contigo</p>
-            <button class="btn-solicitar">
-                Solicitar Membresía
+            <p>Al convertirte en socio, tendrás acceso completo a eventos, reuniones y decisiones de la organización</p>
+            
+            <button class="btn-convertir-socio" id="btnConvertirSocio">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" fill="currentColor"/>
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="currentColor"/>
                 </svg>
+                Convertirme en Socio
             </button>
         </section>
     </main>
 
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirmar Conversión a Socio</h2>
+                <button type="button" id="closeModal" class="close-btn">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-warning-box">
+                    <p class="warning-title">Importante: Este cambio es permanente</p>
+                    <p class="warning-text">Una vez que te conviertas en socio, no podrás regresar a ser donante. Tu cuenta cambiará de forma definitiva.</p>
+                </div>
+                
+                <p class="modal-question">¿Estás seguro de que deseas continuar?</p>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" id="btnCancelar">
+                    Cancelar
+                </button>
+                <button type="button" class="btn-confirmar" id="btnConfirmar">
+                    <span class="btn-text">Sí, convertirme en Socio</span>
+                    <span class="btn-loader" style="display: none;">
+                        <span class="loader"></span> Procesando...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="javaScript/supabase-config.js"></script>
     <script src="javaScript/donante-dashboard.js"></script>
     <script src="javaScript/donante-socio.js"></script>
 </body>
