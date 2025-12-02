@@ -500,11 +500,11 @@ async function guardarDonacionUnica(datos) {
             .select();
         
         if (error) {
-            console.error('❌ Error al guardar donación:', error);
+            console.error('Error al guardar donación:', error);
             throw new Error(error.message);
         }
         
-        console.log('✅ Donación guardada exitosamente:', data);
+        console.log('Donación guardada exitosamente:', data);
         
         // 2. Preparar datos para los correos
         const fechaFormateada = new Date().toLocaleDateString('es-MX', {
@@ -519,7 +519,7 @@ async function guardarDonacionUnica(datos) {
 
         // 3. Enviar correo de agradecimiento al donante
         try {
-            console.log('📧 Enviando correo de agradecimiento al donante...');
+            console.log('Enviando correo de agradecimiento al donante...');
             const thankYouResponse = await fetch(`${EMAIL_SERVER_URL}/send-donation-thank-you`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -535,12 +535,12 @@ async function guardarDonacionUnica(datos) {
             });
 
             if (thankYouResponse.ok) {
-                console.log('✅ Correo de agradecimiento enviado al donante');
+                console.log('Correo de agradecimiento enviado al donante');
             } else {
-                console.log('⚠️ No se pudo enviar correo al donante (no crítico)');
+                console.log('No se pudo enviar correo al donante (no crítico)');
             }
         } catch (emailError) {
-            console.log('⚠️ Error al enviar correo al donante (no crítico):', emailError);
+            console.log('Error al enviar correo al donante (no crítico):', emailError);
         }
 
         // 4. Enviar notificación al administrador
@@ -564,12 +564,12 @@ async function guardarDonacionUnica(datos) {
             });
 
             if (notificationResponse.ok) {
-                console.log('✅ Notificación enviada al administrador');
+                console.log('Notificación enviada al administrador');
             } else {
-                console.log('⚠️ No se pudo enviar notificación al administrador (no crítico)');
+                console.log('No se pudo enviar notificación al administrador (no crítico)');
             }
         } catch (emailError) {
-            console.log('⚠️ Error al enviar notificación al administrador (no crítico):', emailError);
+            console.log('Error al enviar notificación al administrador (no crítico):', emailError);
         }
         
         console.log('=== PROCESO COMPLETADO EXITOSAMENTE ===');
@@ -583,7 +583,7 @@ async function guardarDonacionUnica(datos) {
         }, 4000);
         
     } catch (error) {
-        console.error('❌ Error inesperado:', error);
+        console.error('Error inesperado:', error);
         mostrarMensaje('Error al procesar la donación. Por favor inténtalo de nuevo.', 'error');
     } finally {
         mostrarCargando(false);

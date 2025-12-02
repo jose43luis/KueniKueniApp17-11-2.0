@@ -56,21 +56,21 @@ async function enviarCorreoBrevo(destinatario, asunto, contenidoHTML) {
         const data = await response.json();
 
         if (response.ok) {
-            console.log('✅ Correo enviado exitosamente:', data.messageId);
+            console.log('Correo enviado exitosamente:', data.messageId);
             return { success: true, messageId: data.messageId };
         } else {
-            console.error('❌ Error de Brevo:', data);
+            console.error('Error de Brevo:', data);
             return { success: false, error: data };
         }
     } catch (error) {
-        console.error('❌ Error al llamar API de Brevo:', error);
+        console.error('Error al llamar API de Brevo:', error);
         return { success: false, error: error.message };
     }
 }
 
 // Verificación al iniciar
-console.log('✅ Servidor configurado con Brevo API (HTTP)');
-console.log('📧 Remitente:', BREVO_SENDER_EMAIL);
+console.log('Servidor configurado con Brevo API (HTTP)');
+console.log('Remitente:', BREVO_SENDER_EMAIL);
 
 // ===================================================
 // RUTA DE SALUD DEL SERVIDOR
@@ -96,7 +96,7 @@ app.post('/send-recovery-email', async (req, res) => {
             });
         }
 
-        console.log('📧 Solicitud de recuperación para:', email);
+        console.log('Solicitud de recuperación para:', email);
 
         // Buscar usuario en Supabase
         const { data: usuario, error: dbError } = await supabase
@@ -107,13 +107,13 @@ app.post('/send-recovery-email', async (req, res) => {
             .single();
 
         if (dbError || !usuario) {
-            console.log('❌ Usuario no encontrado:', email);
+            console.log(' Usuario no encontrado:', email);
             return res.status(404).json({
                 error: 'No existe una cuenta con este correo electrónico'
             });
         }
 
-        console.log('✅ Usuario encontrado:', usuario.nombre_completo);
+        console.log(' Usuario encontrado:', usuario.nombre_completo);
 
         // Contenido HTML del correo
         const contenidoHTML = `
@@ -259,7 +259,7 @@ app.post('/send-recovery-email', async (req, res) => {
         `;
 
         // Enviar el correo usando API de Brevo
-        console.log('📤 Enviando correo vía API de Brevo...');
+        console.log(' Enviando correo vía API de Brevo...');
         const resultado = await enviarCorreoBrevo(
             usuario.email,
             'Recuperación de Contraseña - Kueni Kueni',
@@ -280,7 +280,7 @@ app.post('/send-recovery-email', async (req, res) => {
         }
 
     } catch (error) {
-        console.error('❌ Error general:', error);
+        console.error('Error general:', error);
         res.status(500).json({
             error: 'Error al procesar la solicitud',
             details: error.message
@@ -629,14 +629,14 @@ app.post('/send-donation-thank-you', async (req, res) => {
         );
 
         if (resultado.success) {
-            console.log(`✅ Correo de agradecimiento enviado a: ${email}`);
+            console.log(`Correo de agradecimiento enviado a: ${email}`);
             res.json({
                 success: true,
                 message: 'Correo de agradecimiento enviado',
                 messageId: resultado.messageId
             });
         } else {
-            console.error('❌ Error al enviar correo:', resultado.error);
+            console.error('Error al enviar correo:', resultado.error);
             res.status(500).json({
                 success: false,
                 error: 'Error al enviar correo de agradecimiento',
@@ -645,7 +645,7 @@ app.post('/send-donation-thank-you', async (req, res) => {
         }
 
     } catch (error) {
-        console.error('❌ Error al procesar correo de agradecimiento:', error);
+        console.error('Error al procesar correo de agradecimiento:', error);
         res.status(500).json({
             success: false,
             error: error.message
@@ -760,7 +760,7 @@ app.post('/send-donation-notification', async (req, res) => {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>💰 Nueva Donación Recibida</h1>
+                        <h1>Nueva Donación Recibida</h1>
                     </div>
                     
                     <div class="content">
@@ -859,14 +859,14 @@ app.post('/send-donation-notification', async (req, res) => {
         );
 
         if (resultado.success) {
-            console.log(`✅ Notificación enviada al administrador: ${adminEmail}`);
+            console.log(`Notificación enviada al administrador: ${adminEmail}`);
             res.json({
                 success: true,
                 message: 'Notificación enviada al administrador',
                 messageId: resultado.messageId
             });
         } else {
-            console.error('❌ Error al enviar notificación:', resultado.error);
+            console.error('Error al enviar notificación:', resultado.error);
             res.status(500).json({
                 success: false,
                 error: 'Error al enviar notificación',
@@ -875,7 +875,7 @@ app.post('/send-donation-notification', async (req, res) => {
         }
 
     } catch (error) {
-        console.error('❌ Error al procesar notificación:', error);
+        console.error('Error al procesar notificación:', error);
         res.status(500).json({
             success: false,
             error: error.message

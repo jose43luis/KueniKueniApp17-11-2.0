@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         donationForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            console.log('📝 Iniciando proceso de donación...');
+            console.log('Iniciando proceso de donación...');
             
             if (selectedAmount === 0 || selectedAmount < 10) {
                 mostrarMensaje('Por favor selecciona un monto de donación válido (mínimo $10 MXN)', 'error');
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const destinoValue = destinoSelect.value;
             const destinoTexto = destinoSelect.options[destinoSelect.selectedIndex].text;
             
-            console.log('📊 Datos de donación:', {
+            console.log(' Datos de donación:', {
                 monto: selectedAmount,
                 tipo: tipoDonacion,
                 destino: destinoTexto,
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // - estado_recurrencia
             };
             
-            console.log('💾 Datos a guardar:', donacionData);
+            console.log('Datos a guardar:', donacionData);
             
             await guardarDonacion(donacionData);
         });
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('\n=== INICIANDO GUARDADO DE DONACIÓN ===');
     
     if (!window.supabaseClient) {
-        console.error('❌ Supabase no está configurado');
+        console.error('Supabase no está configurado');
         mostrarMensaje('Error: No se pudo conectar con la base de datos', 'error');
         return;
     }
@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     try {
         mostrarCargando(true);
         
-        console.log('📊 Datos a insertar en la base de datos:');
+        console.log('Datos a insertar en la base de datos:');
         console.table(datos);
         
         // 1. Guardar donación en Supabase
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             .select();
         
         if (error) {
-            console.error('❌ ERROR AL GUARDAR DONACIÓN:', error);
+            console.error('ERROR AL GUARDAR DONACIÓN:', error);
             console.error('Mensaje:', error.message);
             console.error('Detalles:', error.details);
             console.error('Hint:', error.hint);
@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
         
-        console.log('✅ DONACIÓN GUARDADA EXITOSAMENTE');
+        console.log('DONACIÓN GUARDADA EXITOSAMENTE');
         console.log('Datos guardados:', data);
         
         // 2. Preparar datos para los correos
@@ -398,12 +398,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
 
             if (thankYouResponse.ok) {
-                console.log('✅ Correo de agradecimiento enviado al socio');
+                console.log('Correo de agradecimiento enviado al socio');
             } else {
-                console.log('⚠️ No se pudo enviar correo al socio (no crítico)');
+                console.log('No se pudo enviar correo al socio (no crítico)');
             }
         } catch (emailError) {
-            console.log('⚠️ Error al enviar correo al socio (no crítico):', emailError);
+            console.log('Error al enviar correo al socio (no crítico):', emailError);
         }
 
         // 4. Enviar notificación al administrador
@@ -427,12 +427,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
 
             if (notificationResponse.ok) {
-                console.log('✅ Notificación enviada al administrador');
+                console.log('Notificación enviada al administrador');
             } else {
-                console.log('⚠️ No se pudo enviar notificación al administrador (no crítico)');
+                console.log('No se pudo enviar notificación al administrador (no crítico)');
             }
         } catch (emailError) {
-            console.log('⚠️ Error al enviar notificación al administrador (no crítico):', emailError);
+            console.log('Error al enviar notificación al administrador (no crítico):', emailError);
         }
         
         console.log('=== PROCESO COMPLETADO EXITOSAMENTE ===\n');
@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }, 4000);
         
     } catch (error) {
-        console.error('❌ ERROR INESPERADO:', error);
+        console.error('ERROR INESPERADO:', error);
         console.error('Stack:', error.stack);
         mostrarMensaje('Error inesperado al procesar la donación. Por favor inténtalo de nuevo.', 'error');
     } finally {
@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const tipoTexto = datos.tipo_donacion === 'mensual' ? 'mensual' : 'única';
         const esMensual = datos.tipo_donacion === 'mensual';
         const recurrenteInfo = esMensual ? 
-            `<p class="success-recurrent">📋 Tu donación mensual ha sido registrada</p>` : '';
+            `<p class="success-recurrent">Tu donación mensual ha sido registrada</p>` : '';
         
         container.innerHTML = `
             <div class="message message-success">
