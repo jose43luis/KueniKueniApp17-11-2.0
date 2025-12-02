@@ -1,5 +1,5 @@
-// coordinador-noticias.js - Sistema completo de gestión de noticias con almacenamiento de imágenes
-console.log('Sistema de noticias del coordinador iniciando...');
+// coordinador-noticias.js - CON PAGINACIÓN 5 EN 5 Y ALERTAS PERSONALIZADAS
+console.log('✅ Sistema de noticias del coordinador iniciando...');
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM cargado');
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     setTimeout(() => {
         if (window.supabaseClient) {
-            console.log('Supabase conectado');
+            console.log('✅ Supabase conectado');
             inicializarStorage();
             cargarDatos();
         }
@@ -18,8 +18,170 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 let noticiasGlobal = [];
+let noticiasFiltradas = [];
 let noticiaEditando = null;
 let imagenSubida = null;
+
+// Variables de paginación
+let paginaActual = 1;
+const noticiasPorPagina = 5;
+
+// ============================================
+// COMPONENTE DE ALERTA PERSONALIZADA
+// ============================================
+
+function mostrarAlertaPersonalizada(titulo, mensaje, textoAceptar = 'Aceptar', textoCancelar = 'Cancelar', onAceptar = null) {
+    const alertaExistente = document.getElementById('alertaPersonalizada');
+    if (alertaExistente) alertaExistente.remove();
+
+    const alertaHTML = `
+        <div id="alertaPersonalizada" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.2s ease;
+        ">
+            <div style="
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                max-width: 400px;
+                width: 90%;
+                padding: 2rem;
+                animation: slideUp 0.3s ease;
+            ">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="
+                        width: 56px;
+                        height: 56px;
+                        background: linear-gradient(135deg, #5f0d51 0%, #7d1166 100%);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 1rem;
+                    ">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </div>
+                    <h3 style="font-size: 1.5rem; font-weight: 700; color: #18181b; margin: 0 0 0.5rem 0;">${titulo}</h3>
+                    <p style="font-size: 1rem; color: #71717a; margin: 0;">${mensaje}</p>
+                </div>
+                <div style="display: flex; gap: 0.75rem; margin-top: 2rem;">
+                    <button id="btnCancelarAlerta" style="
+                        flex: 1;
+                        padding: 0.875rem;
+                        background: #f3f4f6;
+                        color: #52525b;
+                        border: none;
+                        border-radius: 10px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    ">${textoCancelar}</button>
+                    <button id="btnAceptarAlerta" style="
+                        flex: 1;
+                        padding: 0.875rem;
+                        background: linear-gradient(135deg, #5f0d51 0%, #7d1166 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 10px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        box-shadow: 0 4px 12px rgba(95, 13, 81, 0.3);
+                    ">${textoAceptar}</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', alertaHTML);
+    document.body.style.overflow = 'hidden';
+
+    const alerta = document.getElementById('alertaPersonalizada');
+    const btnAceptar = document.getElementById('btnAceptarAlerta');
+    const btnCancelar = document.getElementById('btnCancelarAlerta');
+
+    btnAceptar.addEventListener('mouseenter', () => {
+        btnAceptar.style.transform = 'translateY(-2px)';
+        btnAceptar.style.boxShadow = '0 6px 16px rgba(95, 13, 81, 0.4)';
+    });
+    btnAceptar.addEventListener('mouseleave', () => {
+        btnAceptar.style.transform = 'translateY(0)';
+        btnAceptar.style.boxShadow = '0 4px 12px rgba(95, 13, 81, 0.3)';
+    });
+
+    btnCancelar.addEventListener('mouseenter', () => {
+        btnCancelar.style.background = '#e5e7eb';
+        btnCancelar.style.transform = 'translateY(-2px)';
+    });
+    btnCancelar.addEventListener('mouseleave', () => {
+        btnCancelar.style.background = '#f3f4f6';
+        btnCancelar.style.transform = 'translateY(0)';
+    });
+
+    const cerrarAlerta = () => {
+        alerta.style.opacity = '0';
+        setTimeout(() => {
+            alerta.remove();
+            document.body.style.overflow = '';
+        }, 200);
+    };
+
+    btnCancelar.addEventListener('click', cerrarAlerta);
+    btnAceptar.addEventListener('click', () => {
+        if (onAceptar) onAceptar();
+        cerrarAlerta();
+    });
+
+    alerta.addEventListener('click', (e) => {
+        if (e.target === alerta) cerrarAlerta();
+    });
+}
+
+// CSS para animaciones
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+`;
+document.head.appendChild(style);
 
 // ============================================
 // INICIALIZAR SUPABASE STORAGE
@@ -39,9 +201,8 @@ async function inicializarStorage() {
         
         if (!bucketExists) {
             console.log('Bucket "noticias" no existe. Debes crearlo manualmente en Supabase.');
-            
         } else {
-            console.log('Bucket "noticias" disponible');
+            console.log('✅ Bucket "noticias" disponible');
         }
     } catch (error) {
         console.error('Error al inicializar storage:', error);
@@ -60,18 +221,23 @@ function verificarAutenticacion() {
     }
 }
 
-function cerrarSesion() {
-    if (confirm('¿Cerrar sesión?')) {
-        sessionStorage.clear();
-        window.location.href = 'login.html';
-    }
-}
-
 // ============================================
 // CONFIGURACIÓN DE EVENTOS
 // ============================================
 function configurarEventos() {
-    document.getElementById('btnCerrarSesion')?.addEventListener('click', cerrarSesion);
+    document.getElementById('btnCerrarSesion')?.addEventListener('click', () => {
+        mostrarAlertaPersonalizada(
+            '¿Cerrar sesión?',
+            'Se cerrará tu sesión actual',
+            'Aceptar',
+            'Cancelar',
+            () => {
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            }
+        );
+    });
+    
     document.getElementById('btnAgregarNoticia')?.addEventListener('click', abrirModalNueva);
     document.getElementById('btnCerrarModal')?.addEventListener('click', cerrarModal);
     document.getElementById('btnCancelarModal')?.addEventListener('click', cerrarModal);
@@ -94,35 +260,74 @@ function configurarEventos() {
     });
 }
 
+function configurarValidaciones() {
+    const titulo = document.getElementById('titulo');
+    const contenido = document.getElementById('contenido');
+    
+    if (titulo) {
+        titulo.addEventListener('input', function() {
+            if (this.value.length > 200) {
+                this.value = this.value.substring(0, 200);
+            }
+        });
+    }
+    
+    if (contenido) {
+        contenido.addEventListener('input', function() {
+            if (this.value.length > 5000) {
+                this.value = this.value.substring(0, 5000);
+            }
+        });
+    }
+}
+
 // ============================================
 // MANEJO DE SUBIDA DE IMAGEN
 // ============================================
 async function handleImagenFileChange(event) {
     const file = event.target.files[0];
+    if (!file) return;
     
-    if (!file) {
-        return;
-    }
-    
-    if (!file.type.startsWith('image/')) {
-        mostrarMensajeModal('Por favor selecciona un archivo de imagen válido', 'error');
-        event.target.value = '';
-        return;
-    }
-    
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
-        mostrarMensajeModal('La imagen no debe exceder 5MB', 'error');
+        mostrarMensaje('❌ La imagen debe ser menor a 2MB', 'error');
         event.target.value = '';
         return;
     }
     
-    const progressDiv = document.getElementById('uploadProgress');
-    if (progressDiv) {
-        progressDiv.style.display = 'block';
-        progressDiv.innerHTML = '<div style="color:#0d5f3a;font-weight:500;">⏳ Subiendo imagen...</div>';
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+        mostrarMensaje('❌ Solo se permiten imágenes JPG, PNG o WEBP', 'error');
+        event.target.value = '';
+        return;
     }
     
+    try {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            mostrarPreviewImagen(e.target.result);
+        };
+        reader.readAsDataURL(file);
+        
+        imagenSubida = file;
+        console.log('✅ Imagen seleccionada:', file.name);
+        
+    } catch (error) {
+        console.error('Error al procesar imagen:', error);
+        mostrarMensaje('❌ Error al procesar imagen', 'error');
+    }
+}
+
+function mostrarPreviewImagen(url) {
+    const preview = document.getElementById('imagenPreview');
+    if (preview && url) {
+        preview.innerHTML = `
+            <img src="${url}" style="width:100%;height:200px;object-fit:cover;border-radius:8px;">
+        `;
+    }
+}
+
+async function subirImagen(file) {
     try {
         const timestamp = Date.now();
         const extension = file.name.split('.').pop();
@@ -136,171 +341,31 @@ async function handleImagenFileChange(event) {
                 upsert: false
             });
         
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
         
-        const { data: urlData } = window.supabaseClient
+        const { data: { publicUrl } } = window.supabaseClient
             .storage
             .from('noticias')
             .getPublicUrl(fileName);
         
-        const publicUrl = urlData.publicUrl;
-        
-        imagenSubida = {
-            fileName: fileName,
-            url: publicUrl
-        };
-        
-        document.getElementById('imagenUrl').value = publicUrl;
-        mostrarPreviewImagen(publicUrl);
-        
-        if (progressDiv) {
-            progressDiv.innerHTML = '<div style="color:#065f46;font-weight:500;">✅ Imagen subida exitosamente</div>';
-            setTimeout(() => {
-                progressDiv.style.display = 'none';
-            }, 3000);
-        }
-        
-        console.log('Imagen subida:', fileName);
+        console.log('✅ Imagen subida:', publicUrl);
+        return publicUrl;
         
     } catch (error) {
         console.error('Error al subir imagen:', error);
-        
-        let errorMsg = 'Error al subir la imagen';
-        if (error.message.includes('Bucket not found')) {
-            errorMsg = 'El bucket "noticias" no existe. Créalo en Supabase Storage con acceso público.';
-        } else if (error.message.includes('permission')) {
-            errorMsg = 'No tienes permisos para subir archivos. Configura las políticas RLS.';
-        }
-        
-        mostrarMensajeModal(errorMsg, 'error');
-        
-        if (progressDiv) {
-            progressDiv.innerHTML = `<div style="color:#dc2626;">${errorMsg}</div>`;
-        }
-        
-        event.target.value = '';
+        throw error;
     }
-}
-
-function mostrarPreviewImagen(url) {
-    const preview = document.getElementById('imagenPreview');
-    const img = document.getElementById('imagenPreviewImg');
-    
-    if (url) {
-        img.src = url;
-        preview.style.display = 'block';
-        
-        img.onerror = function() {
-            preview.style.display = 'none';
-        };
-    } else {
-        preview.style.display = 'none';
-    }
-}
-
-async function eliminarImagenStorage(imagenUrl) {
-    if (!imagenUrl) return;
-    
-    try {
-        if (!imagenUrl.includes('supabase.co/storage')) {
-            console.log('La imagen no está en Supabase Storage, omitiendo eliminación');
-            return;
-        }
-        
-        const fileName = imagenUrl.split('/').pop().split('?')[0];
-        
-        if (!fileName) {
-            console.log('No se pudo extraer el nombre del archivo');
-            return;
-        }
-        
-        const { error } = await window.supabaseClient
-            .storage
-            .from('noticias')
-            .remove([fileName]);
-        
-        if (error) {
-            console.error('Error al eliminar imagen:', error);
-        } else {
-            console.log('Imagen eliminada del storage:', fileName);
-        }
-        
-    } catch (error) {
-        console.error('Error al eliminar imagen:', error);
-    }
-}
-
-// ============================================
-// VALIDACIONES
-// ============================================
-function configurarValidaciones() {
-    const tituloInput = document.getElementById('titulo');
-    const contenidoInput = document.getElementById('contenido');
-    
-    if (tituloInput) {
-        tituloInput.addEventListener('blur', validarTitulo);
-    }
-    
-    if (contenidoInput) {
-        contenidoInput.addEventListener('blur', validarContenido);
-    }
-}
-
-function validarTitulo() {
-    const titulo = document.getElementById('titulo').value.trim();
-    const error = document.getElementById('tituloError');
-    
-    if (!titulo) {
-        error.textContent = 'El título es obligatorio';
-        return false;
-    }
-    
-    if (titulo.length < 10) {
-        error.textContent = 'El título debe tener al menos 10 caracteres';
-        return false;
-    }
-    
-    if (titulo.length > 255) {
-        error.textContent = 'El título no puede exceder 255 caracteres';
-        return false;
-    }
-    
-    error.textContent = '';
-    return true;
-}
-
-function validarContenido() {
-    const contenido = document.getElementById('contenido').value.trim();
-    const error = document.getElementById('contenidoError');
-    
-    if (!contenido) {
-        error.textContent = 'El contenido es obligatorio';
-        return false;
-    }
-    
-    if (contenido.length < 50) {
-        error.textContent = 'El contenido debe tener al menos 50 caracteres';
-        return false;
-    }
-    
-    error.textContent = '';
-    return true;
 }
 
 // ============================================
 // CARGAR DATOS
 // ============================================
 async function cargarDatos() {
-    if (!window.supabaseClient) return;
-    
     try {
         await cargarEstadisticas();
         await cargarNoticias();
     } catch (error) {
         console.error('Error:', error);
-        mostrarMensaje('Error al cargar datos', 'error');
     }
 }
 
@@ -320,11 +385,11 @@ async function cargarEstadisticas() {
         document.getElementById('totalNoticias').textContent = total;
         document.getElementById('noticiasPublicadas').textContent = publicadas;
         document.getElementById('noticiasBorradores').textContent = borradores;
-        document.getElementById('totalVistas').textContent = totalVistas.toLocaleString('es-MX');
+        document.getElementById('totalVistas').textContent = totalVistas;
         
-        console.log('Estadísticas cargadas');
+        console.log('✅ Estadísticas cargadas');
     } catch (error) {
-        console.error('Error al cargar estadísticas:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -333,19 +398,98 @@ async function cargarNoticias() {
         const { data: noticias, error } = await window.supabaseClient
             .from('noticias')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('fecha_publicacion', { ascending: false });
         
         if (error) throw error;
         
         noticiasGlobal = noticias || [];
-        mostrarNoticias(noticias || []);
+        noticiasFiltradas = noticias || [];
+        paginaActual = 1;
+        mostrarNoticiasPaginadas();
         
-        console.log(`${noticias?.length || 0} noticias cargadas`);
+        console.log('✅ Noticias cargadas:', noticias?.length);
     } catch (error) {
-        console.error('Error al cargar noticias:', error);
-        mostrarMensaje('Error al cargar noticias', 'error');
+        console.error('Error:', error);
     }
 }
+
+// ============================================
+// PAGINACIÓN DE 5 EN 5
+// ============================================
+
+function mostrarNoticiasPaginadas() {
+    const inicio = (paginaActual - 1) * noticiasPorPagina;
+    const fin = inicio + noticiasPorPagina;
+    const noticiasPagina = noticiasFiltradas.slice(inicio, fin);
+    
+    mostrarNoticias(noticiasPagina);
+    mostrarControlesPaginacion();
+}
+
+function mostrarControlesPaginacion() {
+    const totalPaginas = Math.ceil(noticiasFiltradas.length / noticiasPorPagina);
+    const tbody = document.getElementById('tablaNoticias');
+    
+    if (totalPaginas <= 1) return;
+    
+    const paginacionHTML = `
+        <tr>
+            <td colspan="7" style="padding: 1.5rem; text-align: center; background: #f9fafb; border-top: 2px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                    <button onclick="cambiarPagina(${paginaActual - 1})" 
+                        ${paginaActual === 1 ? 'disabled' : ''}
+                        style="
+                            padding: 0.5rem 1rem;
+                            background: ${paginaActual === 1 ? '#f3f4f6' : '#5f0d51'};
+                            color: ${paginaActual === 1 ? '#9ca3af' : 'white'};
+                            border: none;
+                            border-radius: 8px;
+                            cursor: ${paginaActual === 1 ? 'not-allowed' : 'pointer'};
+                            font-weight: 600;
+                            transition: all 0.2s;
+                        ">
+                        ← Anterior
+                    </button>
+                    
+                    <span style="font-weight: 600; color: #18181b;">
+                        Página ${paginaActual} de ${totalPaginas}
+                    </span>
+                    
+                    <button onclick="cambiarPagina(${paginaActual + 1})" 
+                        ${paginaActual === totalPaginas ? 'disabled' : ''}
+                        style="
+                            padding: 0.5rem 1rem;
+                            background: ${paginaActual === totalPaginas ? '#f3f4f6' : '#5f0d51'};
+                            color: ${paginaActual === totalPaginas ? '#9ca3af' : 'white'};
+                            border: none;
+                            border-radius: 8px;
+                            cursor: ${paginaActual === totalPaginas ? 'not-allowed' : 'pointer'};
+                            font-weight: 600;
+                            transition: all 0.2s;
+                        ">
+                        Siguiente →
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `;
+    
+    tbody.insertAdjacentHTML('beforeend', paginacionHTML);
+}
+
+function cambiarPagina(nuevaPagina) {
+    const totalPaginas = Math.ceil(noticiasFiltradas.length / noticiasPorPagina);
+    if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
+    paginaActual = nuevaPagina;
+    mostrarNoticiasPaginadas();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.cambiarPagina = cambiarPagina;
+
+// ============================================
+// MOSTRAR NOTICIAS
+// ============================================
 
 function mostrarNoticias(noticias) {
     const tbody = document.getElementById('tablaNoticias');
@@ -363,38 +507,33 @@ function mostrarNoticias(noticias) {
         return `
             <tr>
                 <td>
-                    <div style="display:flex;align-items:center;gap:0.75rem;">
-                        ${noticia.imagen_url ? 
-                            `<img src="${noticia.imagen_url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">` :
-                            `<div style="width:60px;height:60px;background:#f4f4f5;border-radius:8px;display:flex;align-items:center;justify-content:center;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#a1a1aa">
-                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                                </svg>
-                            </div>`
-                        }
-                        <div>
-                            <div style="font-weight:600;margin-bottom:0.25rem;">${noticia.titulo}</div>
-                            <div style="font-size:0.875rem;color:#71717a;">${truncarTexto(noticia.contenido, 60)}</div>
+                    <div class="noticia-card">
+                        ${noticia.imagen_url ? `
+                            <img src="${noticia.imagen_url}" class="noticia-imagen" alt="${noticia.titulo}">
+                        ` : ''}
+                        <div class="noticia-info">
+                            <h3 class="noticia-titulo">${noticia.titulo}</h3>
+                            <p class="noticia-descripcion">${truncarTexto(noticia.contenido, 80)}</p>
                         </div>
                     </div>
                 </td>
                 <td><span class="badge-categoria ${categoriaBadge.clase}">${categoriaBadge.texto}</span></td>
-                <td style="color:#71717a;">${noticia.autor_nombre}</td>
-                <td style="color:#71717a;">${formatearFecha(noticia.fecha_publicacion)}</td>
+                <td style="font-size:0.875rem;color:#6b7280;">${noticia.autor || 'Coordinador'}</td>
+                <td style="font-size:0.875rem;color:#6b7280;">${formatearFecha(noticia.fecha_publicacion)}</td>
                 <td><span class="badge-estado ${estadoBadge.clase}">${estadoBadge.texto}</span></td>
-                <td style="text-align:center;font-weight:600;">${noticia.vistas || 0}</td>
+                <td style="text-align:center;font-weight:600;color:#18181b;">${noticia.vistas || 0}</td>
                 <td>
-                    <div style="display:flex;gap:0.5rem;">
+                    <div style="display:flex;gap:0.5rem;justify-content:center;">
                         <button onclick="editarNoticia('${noticia.id}')" class="btn-icon" title="Editar">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                             </svg>
                         </button>
-                        <button onclick="eliminarNoticia('${noticia.id}', '${noticia.imagen_url || ''}')" class="btn-icon btn-danger" title="Eliminar">
+                        <button onclick="eliminarNoticia('${noticia.id}')" class="btn-icon btn-danger" title="Eliminar">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
                             </svg>
                         </button>
                     </div>
@@ -409,42 +548,31 @@ function filtrarNoticias() {
     const estado = document.getElementById('filtroEstado').value;
     const categoria = document.getElementById('filtroCategoria').value;
     
-    let filtradas = noticiasGlobal;
+    noticiasFiltradas = noticiasGlobal;
     
     if (busqueda) {
-        filtradas = filtradas.filter(n => 
+        noticiasFiltradas = noticiasFiltradas.filter(n => 
             n.titulo.toLowerCase().includes(busqueda) ||
-            n.contenido.toLowerCase().includes(busqueda) ||
-            n.autor_nombre.toLowerCase().includes(busqueda)
+            n.contenido?.toLowerCase().includes(busqueda)
         );
     }
+    if (estado) noticiasFiltradas = noticiasFiltradas.filter(n => n.estado === estado);
+    if (categoria) noticiasFiltradas = noticiasFiltradas.filter(n => n.categoria === categoria);
     
-    if (estado) {
-        filtradas = filtradas.filter(n => n.estado === estado);
-    }
-    
-    if (categoria) {
-        filtradas = filtradas.filter(n => n.categoria === categoria);
-    }
-    
-    mostrarNoticias(filtradas);
-    console.log(`Filtrado: ${filtradas.length} de ${noticiasGlobal.length}`);
+    paginaActual = 1;
+    mostrarNoticiasPaginadas();
 }
 
 // ============================================
 // MODAL
 // ============================================
+
 function abrirModalNueva() {
     noticiaEditando = null;
     imagenSubida = null;
     document.getElementById('modalTitulo').textContent = 'Nueva Noticia';
     document.getElementById('formNoticia').reset();
-    document.getElementById('imagenPreview').style.display = 'none';
-    document.getElementById('uploadProgress').style.display = 'none';
-    
-    const hoy = new Date().toISOString().split('T')[0];
-    document.getElementById('fechaPublicacion').value = hoy;
-    
+    document.getElementById('imagenPreview').innerHTML = '';
     abrirModal();
 }
 
@@ -452,106 +580,85 @@ function abrirModal() {
     const modal = document.getElementById('modalNoticia');
     if (modal) {
         modal.style.display = 'flex';
-        limpiarFormulario();
+        document.body.style.overflow = 'hidden';
     }
 }
 
 function cerrarModal() {
     const modal = document.getElementById('modalNoticia');
-    if (modal) modal.style.display = 'none';
-    limpiarFormulario();
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
     noticiaEditando = null;
     imagenSubida = null;
 }
 
-function limpiarFormulario() {
-    document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
-    document.getElementById('modalMessage').innerHTML = '';
-}
+// ============================================
+// GUARDAR NOTICIA
+// ============================================
 
-// ============================================
-// CRUD NOTICIAS
-// ============================================
 async function guardarNoticia() {
-    const tituloValido = validarTitulo();
-    const contenidoValido = validarContenido();
-    
-    if (!tituloValido || !contenidoValido) {
-        mostrarMensajeModal('Por favor corrige los errores', 'error');
-        return;
-    }
-    
-    const titulo = document.getElementById('titulo').value.trim();
-    const contenido = document.getElementById('contenido').value.trim();
-    const categoria = document.getElementById('categoria').value;
-    const estado = document.getElementById('estado').value;
-    const fechaPublicacion = document.getElementById('fechaPublicacion').value;
-    const imagenUrl = document.getElementById('imagenUrl').value.trim();
-    
-    if (!categoria) {
-        mostrarMensajeModal('Selecciona una categoría', 'error');
-        return;
-    }
-    
     const btnGuardar = document.getElementById('btnGuardarNoticia');
     const btnText = document.getElementById('btnGuardarText');
     const btnLoader = document.getElementById('btnGuardarLoader');
-    const loader = document.getElementById('loader');
     
+    btnGuardar.disabled = true;
+    btnText.style.display = 'none';
+    btnLoader.style.display = 'inline';
+
     try {
-        btnGuardar.disabled = true;
-        btnText.style.display = 'none';
-        btnLoader.style.display = 'inline-flex';
-        if (loader) loader.style.display = 'flex';
+        let imagenUrl = document.getElementById('imagenUrl').value.trim();
         
-        const autorNombre = sessionStorage.getItem('userName') || 'Coordinador';
-        const autorId = sessionStorage.getItem('userId');
+        if (imagenSubida) {
+            imagenUrl = await subirImagen(imagenSubida);
+        }
         
-        const noticiaData = {
-            titulo,
-            contenido,
-            categoria,
-            estado,
-            fecha_publicacion: fechaPublicacion || new Date().toISOString().split('T')[0],
+        const autor = sessionStorage.getItem('userName') || 'Coordinador';
+        
+        const datos = {
+            titulo: document.getElementById('titulo').value,
+            categoria: document.getElementById('categoria').value,
+            contenido: document.getElementById('contenido').value,
             imagen_url: imagenUrl || null,
-            autor_nombre: autorNombre,
-            autor_id: autorId
+            estado: document.getElementById('estado').value,
+            autor: autor,
+            fecha_publicacion: new Date().toISOString().split('T')[0]
         };
-        
+
         let error;
-        
         if (noticiaEditando) {
             const result = await window.supabaseClient
                 .from('noticias')
-                .update(noticiaData)
+                .update(datos)
                 .eq('id', noticiaEditando);
             error = result.error;
-            console.log('Noticia actualizada');
         } else {
+            datos.vistas = 0;
             const result = await window.supabaseClient
                 .from('noticias')
-                .insert([noticiaData]);
+                .insert([datos]);
             error = result.error;
-            console.log('Nueva noticia creada');
         }
-        
+
         if (error) throw error;
-        
-        mostrarMensajeModal('¡Noticia guardada exitosamente!', 'success');
-        
+
+        mostrarMensaje(noticiaEditando ? '✅ Noticia actualizada' : '✅ Noticia creada', 'success');
+        cerrarModal();
         await cargarDatos();
-        setTimeout(cerrarModal, 1500);
-        
     } catch (error) {
         console.error('Error:', error);
-        mostrarMensajeModal(error.message || 'Error al guardar', 'error');
+        mostrarMensaje('❌ Error al guardar', 'error');
     } finally {
         btnGuardar.disabled = false;
         btnText.style.display = 'inline';
         btnLoader.style.display = 'none';
-        if (loader) loader.style.display = 'none';
     }
 }
+
+// ============================================
+// EDITAR NOTICIA
+// ============================================
 
 async function editarNoticia(id) {
     try {
@@ -564,66 +671,61 @@ async function editarNoticia(id) {
         if (error) throw error;
         
         noticiaEditando = id;
-        imagenSubida = null;
         document.getElementById('modalTitulo').textContent = '✏️ Editar Noticia';
-        
         document.getElementById('titulo').value = noticia.titulo;
-        document.getElementById('contenido').value = noticia.contenido;
         document.getElementById('categoria').value = noticia.categoria;
-        document.getElementById('estado').value = noticia.estado;
-        document.getElementById('fechaPublicacion').value = noticia.fecha_publicacion;
+        document.getElementById('contenido').value = noticia.contenido;
         document.getElementById('imagenUrl').value = noticia.imagen_url || '';
+        document.getElementById('estado').value = noticia.estado;
         
         if (noticia.imagen_url) {
             mostrarPreviewImagen(noticia.imagen_url);
         }
         
         abrirModal();
-        
     } catch (error) {
         console.error('Error:', error);
-        mostrarMensaje('Error al cargar noticia', 'error');
-    }
-}
-
-async function eliminarNoticia(id, imagenUrl) {
-    if (!confirm('¿Estás seguro de eliminar esta noticia? Esta acción eliminará también la imagen asociada y no se puede deshacer.')) {
-        return;
-    }
-    
-    const loader = document.getElementById('loader');
-    
-    try {
-        if (loader) loader.style.display = 'flex';
-        
-        if (imagenUrl) {
-            await eliminarImagenStorage(imagenUrl);
-        }
-        
-        const { error } = await window.supabaseClient
-            .from('noticias')
-            .delete()
-            .eq('id', id);
-        
-        if (error) throw error;
-        
-        mostrarMensaje('Noticia e imagen eliminadas exitosamente', 'success');
-        await cargarDatos();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('Error al eliminar noticia', 'error');
-    } finally {
-        if (loader) loader.style.display = 'none';
+        mostrarMensaje('❌ Error al cargar noticia', 'error');
     }
 }
 
 window.editarNoticia = editarNoticia;
+
+// ============================================
+// ELIMINAR NOTICIA
+// ============================================
+
+async function eliminarNoticia(id) {
+    mostrarAlertaPersonalizada(
+        '¿Eliminar noticia?',
+        'Esta acción no se puede deshacer',
+        'Eliminar',
+        'Cancelar',
+        async () => {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('noticias')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                mostrarMensaje('✅ Noticia eliminada', 'success');
+                await cargarDatos();
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarMensaje('❌ Error al eliminar', 'error');
+            }
+        }
+    );
+}
+
 window.eliminarNoticia = eliminarNoticia;
 
 // ============================================
 // UTILIDADES
 // ============================================
+
 function obtenerEstadoBadge(estado) {
     const badges = {
         'publicado': { clase: 'estado-publicado', texto: 'Publicado' },
@@ -635,20 +737,19 @@ function obtenerEstadoBadge(estado) {
 
 function obtenerCategoriaBadge(categoria) {
     const badges = {
-        'Medio Ambiente': { clase: 'cat-ambiente', texto: 'Medio Ambiente' },
-        'Deportes': { clase: 'cat-deportes', texto: 'Deportes' },
         'Cultura': { clase: 'cat-cultura', texto: 'Cultura' },
+        'Medio Ambiente': { clase: 'cat-medio-ambiente', texto: 'Medio Ambiente' },
+        'Deportes': { clase: 'cat-deportes', texto: 'Deportes' },
         'Emprendimiento': { clase: 'cat-emprendimiento', texto: 'Emprendimiento' },
         'General': { clase: 'cat-general', texto: 'General' }
     };
-    return badges[categoria] || { clase: '', texto: categoria };
+    return badges[categoria] || { clase: 'cat-general', texto: categoria };
 }
 
 function formatearFecha(fecha) {
     if (!fecha) return 'N/A';
-    const [year, month, day] = fecha.split('-');
-    const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const date = new Date(fecha + 'T00:00:00');
+    return date.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function truncarTexto(texto, max) {
@@ -659,16 +760,13 @@ function truncarTexto(texto, max) {
 
 function mostrarMensaje(texto, tipo) {
     const container = document.createElement('div');
-    container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;';
+    container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;animation:slideIn 0.3s ease;';
     container.innerHTML = `<div style="padding:1rem 1.5rem;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);background:${tipo === 'success' ? '#d1fae5' : '#fee2e2'};color:${tipo === 'success' ? '#065f46' : '#dc2626'};border:1px solid ${tipo === 'success' ? '#a7f3d0' : '#fecaca'};">${texto}</div>`;
     document.body.appendChild(container);
     setTimeout(() => container.remove(), 3000);
 }
 
-function mostrarMensajeModal(texto, tipo) {
-    const container = document.getElementById('modalMessage');
-    container.innerHTML = `<div style="padding:1rem;border-radius:8px;margin-bottom:1rem;background:${tipo === 'success' ? '#d1fae5' : '#fee2e2'};color:${tipo === 'success' ? '#065f46' : '#dc2626'};border:1px solid ${tipo === 'success' ? '#a7f3d0' : '#fecaca'};">${texto}</div>`;
-    if (tipo === 'success') setTimeout(() => container.innerHTML = '', 3000);
-}
-
-console.log('Sistema de noticias del coordinador cargado');
+console.log('✅ Sistema MEJORADO cargado');
+console.log('✅ Paginación: 5 noticias por página');
+console.log('✅ Alertas personalizadas');
+console.log('✅ Animaciones sutiles');

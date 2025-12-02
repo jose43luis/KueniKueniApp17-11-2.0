@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Eventos - Coordinador</title>
 
-
     <!-- 1. Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -74,7 +73,7 @@
     <main class="main-content">
         <div class="page-header">
             <div>
-                <h1> Gestión de Eventos</h1>
+                <h1>Gestión de Eventos</h1>
                 <p>Crea eventos y gestiona asistencias</p>
             </div>
             <button id="btnAgregarEvento" class="btn-primary">
@@ -156,7 +155,7 @@
         <div class="modal-content modal-large">
             <div class="modal-header">
                 <div>
-                    <h2 id="modalTitulo"> Nuevo Evento</h2>
+                    <h2 id="modalTitulo">Nuevo Evento</h2>
                     <p>Completa la información del evento</p>
                 </div>
                 <button id="btnCerrarModal" class="btn-close">×</button>
@@ -173,12 +172,12 @@
                             <label>Categoría <span class="required">*</span></label>
                             <select id="categoria" class="form-input" required>
                                 <option value="">Selecciona...</option>
-                                <option value="Educación"> Educación</option>
-                                <option value="Salud"> Salud</option>
-                                <option value="Medio Ambiente"> Medio Ambiente</option>
-                                <option value="Cultura"> Cultura</option>
-                                <option value="Deporte"> Deporte</option>
-                                <option value="Otro"> Otro</option>
+                                <option value="Educación">Educación</option>
+                                <option value="Salud">Salud</option>
+                                <option value="Medio Ambiente">Medio Ambiente</option>
+                                <option value="Cultura">Cultura</option>
+                                <option value="Deporte">Deporte</option>
+                                <option value="Otro">Otro</option>
                             </select>
                         </div>
                     </div>
@@ -210,14 +209,8 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Estado <span class="required">*</span></label>
-                        <select id="estado" class="form-input" required>
-                            <option value="proximo"> Próximo</option>
-                            <option value="en_curso"> En Curso</option>
-                            <option value="completado"> Completado</option>
-                        </select>
-                    </div>
+                    <!-- Campo de estado oculto, siempre será "proximo" por defecto -->
+                    <input type="hidden" id="estado" value="proximo">
 
                     <div class="modal-actions">
                         <button type="button" id="btnCancelarModal" class="btn-secondary">Cancelar</button>

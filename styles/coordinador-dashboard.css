@@ -1,4 +1,4 @@
-/* coordinador-dashboard.css */
+/* coordinador-dashboard.css - DISEÑO ORIGINAL CON ANIMACIONES SUTILES Y GRADIENTES */
 
 * {
     margin: 0;
@@ -53,6 +53,7 @@ body {
     overflow-y: auto;
 }
 
+/* ANIMACIÓN SUTIL PARA NAV ITEMS */
 .nav-item {
     display: flex;
     align-items: center;
@@ -60,10 +61,16 @@ body {
     padding: 0.875rem 1.5rem;
     color: rgba(255,255,255,0.8);
     text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.nav-item:hover, .nav-item.active {
+.nav-item:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    transform: translateX(6px);
+}
+
+.nav-item.active {
     background: rgba(255,255,255,0.1);
     color: white;
 }
@@ -71,6 +78,11 @@ body {
 .nav-item svg {
     width: 20px;
     height: 20px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-item:hover svg {
+    transform: scale(1.1);
 }
 
 .btn-cerrar-sesion {
@@ -88,11 +100,12 @@ body {
     font-family: inherit;
     font-size: 0.875rem;
     font-weight: 500;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-cerrar-sesion:hover {
     background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
 }
 
 /* ============================================ */
@@ -119,7 +132,7 @@ body {
 }
 
 /* ============================================ */
-/* ESTADÍSTICAS */
+/* ESTADÍSTICAS CON GRADIENTES Y ANIMACIONES */
 /* ============================================ */
 
 .stats-grid {
@@ -136,6 +149,44 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     display: flex;
     gap: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid #e5e7eb;
+}
+
+/* Gradiente en la parte superior */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+/* Colores específicos para cada tarjeta */
+.stat-card:nth-child(1)::before {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.stat-card:nth-child(2)::before {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.stat-card:nth-child(3)::before {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.stat-card:nth-child(4)::before {
+    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(95, 13, 81, 0.15);
+    border-color: #5f0d51;
 }
 
 .stat-icon {
@@ -146,6 +197,28 @@ body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+/* Colores de fondo de iconos */
+.stat-card:nth-child(1) .stat-icon {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.stat-card:nth-child(2) .stat-icon {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.stat-card:nth-child(3) .stat-icon {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.stat-card:nth-child(4) .stat-icon {
+    background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
 }
 
 .stat-content {
@@ -156,6 +229,9 @@ body {
     font-size: 0.875rem;
     color: #6b7280;
     margin-bottom: 0.5rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .stat-value {
@@ -163,6 +239,11 @@ body {
     font-weight: 700;
     color: #1f2937;
     margin-bottom: 0.25rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover .stat-value {
+    transform: scale(1.05);
 }
 
 .stat-subtitle {
@@ -185,6 +266,12 @@ body {
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #e5e7eb;
+}
+
+.content-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .card-header {
@@ -205,7 +292,7 @@ body {
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
-    transition: color 0.2s;
+    transition: all 0.2s;
 }
 
 .btn-link:hover {
@@ -220,7 +307,7 @@ body {
 }
 
 /* ============================================ */
-/* EVENTOS */
+/* EVENTOS - ANIMACIÓN SUTIL */
 /* ============================================ */
 
 .evento-item {
@@ -229,6 +316,13 @@ body {
     border-radius: 8px;
     border-left: 4px solid #5f0d51;
     margin-bottom: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.evento-item:hover {
+    transform: translateX(6px);
+    box-shadow: 0 2px 8px rgba(95, 13, 81, 0.1);
 }
 
 .evento-item:last-child {
@@ -249,6 +343,11 @@ body {
     font-weight: 600;
     color: #1f2937;
     margin-bottom: 0.25rem;
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.evento-item:hover .evento-titulo {
+    color: #5f0d51;
 }
 
 .evento-descripcion {
@@ -275,7 +374,7 @@ body {
 }
 
 /* ============================================ */
-/* NOTICIAS */
+/* NOTICIAS - ANIMACIÓN SUTIL */
 /* ============================================ */
 
 .noticia-item {
@@ -283,6 +382,15 @@ body {
     background: #f9fafb;
     border-radius: 8px;
     margin-bottom: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border-left: 4px solid transparent;
+}
+
+.noticia-item:hover {
+    transform: translateX(6px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left-color: #5f0d51;
 }
 
 .noticia-item:last-child {
@@ -328,6 +436,11 @@ body {
     font-weight: 600;
     color: #1f2937;
     margin-bottom: 0.25rem;
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.noticia-item:hover .noticia-titulo {
+    color: #5f0d51;
 }
 
 .noticia-descripcion {
@@ -363,6 +476,30 @@ body {
     color: #9ca3af;
     padding: 2rem;
 }
+
+/* ============================================ */
+/* ANIMACIONES DE ENTRADA */
+/* ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-card {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.05s; }
+.stat-card:nth-child(2) { animation-delay: 0.1s; }
+.stat-card:nth-child(3) { animation-delay: 0.15s; }
+.stat-card:nth-child(4) { animation-delay: 0.2s; }
 
 /* ============================================ */
 /* RESPONSIVE */

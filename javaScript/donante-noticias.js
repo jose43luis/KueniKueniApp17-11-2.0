@@ -118,7 +118,7 @@ async function cargarNoticias() {
 }
 
 // ============================================================================
-// 5. MOSTRAR NOTICIAS EN UI
+// 5. MOSTRAR NOTICIAS EN UI - IGUAL QUE SOCIO
 // ============================================================================
 
 function mostrarNoticias(noticias) {
@@ -133,26 +133,23 @@ function mostrarNoticias(noticias) {
         const badge = obtenerBadgeCategoria(noticia.categoria);
         
         return `
-            <article class="noticia-card">
-                <div class="noticia-imagen-placeholder">
+            <article class="noticia-article" data-noticia-id="${noticia.id}">
+                <div class="noticia-imagen">
                     ${noticia.imagen_url ? 
-                        `<img src="${noticia.imagen_url}" alt="${noticia.titulo}" class="noticia-imagen" style="width: 100%; height: 100%; object-fit: cover;">` :
+                        `<img src="${noticia.imagen_url}" alt="${noticia.titulo}" style="width: 100%; height: 100%; object-fit: cover;">` :
                         `<svg width="64" height="64" viewBox="0 0 24 24" fill="none">
                             <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="#d4d4d8"/>
                         </svg>`
                     }
                 </div>
-                <div class="noticia-content">
+                <div class="noticia-contenido">
                     <span class="noticia-badge ${badge.clase}">${badge.texto}</span>
-                    <h3 class="noticia-titulo">${noticia.titulo}</h3>
-                    <p class="noticia-descripcion">${truncarTexto(noticia.contenido, 150)}</p>
+                    <h2 class="noticia-titulo">${noticia.titulo}</h2>
+                    <p class="noticia-texto">${truncarTexto(noticia.contenido, 300)}</p>
                     <div class="noticia-meta">
-                        <div class="meta-item">
-                            <span>${formatearFechaNoticia(noticia.fecha_publicacion)}</span>
-                        </div>
-                        <div class="meta-item">
-                            <span>${noticia.autor_nombre}</span>
-                        </div>
+                        <span>${formatearFechaNoticia(noticia.fecha_publicacion)}</span>
+                        <span>${noticia.autor_nombre}</span>
+                        <span>${noticia.vistas || 0} vistas</span>
                     </div>
                     <button class="btn-leer-mas" data-noticia-id="${noticia.id}">
                         Leer más →
@@ -178,7 +175,7 @@ function mostrarSinNoticias() {
     if (!container) return;
     
     container.innerHTML = `
-        <div style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px; border: 1px solid #e4e4e7; grid-column: 1 / -1;">
+        <div style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px; border: 1px solid #e4e4e7;">
             <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 1.5rem; opacity: 0.3;">
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
             </svg>
@@ -198,7 +195,7 @@ function mostrarLoaderNoticias() {
     if (!container) return;
     
     container.innerHTML = `
-        <div style="text-align: center; padding: 4rem 2rem; grid-column: 1 / -1;">
+        <div style="text-align: center; padding: 4rem 2rem;">
             <div class="spinner-large"></div>
             <p style="margin-top: 1.5rem; color: #71717a; font-size: 1rem;">Cargando noticias...</p>
         </div>
@@ -372,7 +369,7 @@ function configurarBotonesLeerMas() {
 
 function obtenerBadgeCategoria(categoria) {
     const badges = {
-        'Medio Ambiente': { clase: 'medio-ambiente', texto: 'Medio Ambiente' },
+        'Medio Ambiente': { clase: 'ambiente', texto: 'Medio Ambiente' },
         'Deportes': { clase: 'deportes', texto: 'Deportes' },
         'Cultura': { clase: 'cultura', texto: 'Cultura' },
         'Emprendimiento': { clase: 'emprendimiento', texto: 'Emprendimiento' },
@@ -401,23 +398,9 @@ function truncarTexto(texto, maxLength) {
 function formatearContenido(contenido) {
     if (!contenido) return '';
     
-    // Reemplazar saltos de línea múltiples por párrafos
-    const parrafos = contenido
-        .split(/\n\n+/)
-        .map(p => p.trim())
-        .filter(p => p !== '');
-    
-    // Si no hay párrafos separados, dividir por saltos simples
-    if (parrafos.length === 1) {
-        return contenido
-            .split('\n')
-            .map(linea => linea.trim())
-            .filter(linea => linea !== '')
-            .map(linea => `<p style="margin-bottom:1rem;">${linea}</p>`)
-            .join('');
-    }
-    
-    return parrafos.map(p => `<p style="margin-bottom:1.5rem;">${p.replace(/\n/g, '<br>')}</p>`).join('');
+    // Dividir en párrafos y agregar etiquetas <p>
+    const parrafos = contenido.split('\n').filter(p => p.trim() !== '');
+    return parrafos.map(p => `<p>${p}</p>`).join('');
 }
 
 // ============================================================================
@@ -616,8 +599,6 @@ style.textContent = `
         color: #3f3f46;
         line-height: 1.8;
         font-size: 1.0625rem;
-        white-space: pre-wrap;
-        word-wrap: break-word;
     }
     
     .modal-contenido-noticia p {

@@ -56,7 +56,7 @@
             </a>
         </nav>
 
-        <button class="logout-btn">
+        <button class="logout-btn" id="logoutBtn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor"/>
             </svg>
@@ -81,21 +81,12 @@
                     <p class="form-subtitle">Completa los detalles de tu contribución</p>
 
                     <form id="donationForm" class="donation-form">
-                        <!-- Tipo de Donación -->
-                        <div class="form-group">
-                            <label class="form-label">Tipo de Donación</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="tipo" value="unica" checked>
-                                    <span class="radio-custom"></span>
-                                    <span class="radio-text">Donación única</span>
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="tipo" value="mensual">
-                                    <span class="radio-custom"></span>
-                                    <span class="radio-text">Donación mensual</span>
-                                </label>
-                            </div>
+                        <!-- Badge de Tipo (Visual) -->
+                        <div class="tipo-donacion-badge">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z" fill="currentColor"/>
+                            </svg>
+                            <span>Donación Única</span>
                         </div>
 
                         <!-- Monto de Donación -->
@@ -109,7 +100,7 @@
                                 <button type="button" class="amount-btn" data-amount="2500">$2500</button>
                                 <button type="button" class="amount-btn" data-amount="otro">Otro</button>
                             </div>
-                            <input type="number" id="customAmount" class="custom-amount" placeholder="Ingresa monto personalizado" style="display: none;">
+                            <input type="number" id="customAmount" class="custom-amount" placeholder="Ingresa monto personalizado (mínimo $50)" min="50" style="display: none;">
                         </div>
 
                         <!-- Destino -->
@@ -154,20 +145,43 @@
                             </div>
                         </div>
 
-                        <!-- Datos de Tarjeta -->
+                        <!-- Tipo de Tarjeta -->
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Tarjeta</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="tipoTarjeta" value="credito" checked required>
+                                    <span class="radio-custom"></span>
+                                    <span class="radio-text">Crédito</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="tipoTarjeta" value="debito">
+                                    <span class="radio-custom"></span>
+                                    <span class="radio-text">Débito</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Número de Tarjeta -->
                         <div class="form-group">
                             <label class="form-label" for="cardNumber">Número de tarjeta</label>
-                            <input type="text" id="cardNumber" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19">
+                            <div class="tarjeta-input-container">
+                                <input type="text" id="cardNumber" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                                <div class="banco-logo" id="bancoLogo" style="display: none;">
+                                    <span id="bancoNombre"></span>
+                                </div>
+                            </div>
+                            <p class="form-help">Ingresa los 16 dígitos de tu tarjeta</p>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label" for="expiry">MM/AA</label>
-                                <input type="text" id="expiry" class="form-input" placeholder="12/25" maxlength="5">
+                                <input type="text" id="expiry" class="form-input" placeholder="12/28" maxlength="5" required>
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="cvv">CVV</label>
-                                <input type="text" id="cvv" class="form-input" placeholder="123" maxlength="3">
+                                <input type="text" id="cvv" class="form-input" placeholder="123" maxlength="3" required>
                             </div>
                         </div>
 
@@ -248,16 +262,8 @@
         </div>
     </main>
 
-    <script src="javaScript/donante-dashboard.js"></script>
-    <script src="javaScript/donante-donar.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Configuración de Supabase -->
-<script src="javaScript/supabase-config.js"></script>
-
-<!-- Scripts de dashboard y donaciones -->
-<script src="javaScript/donante-dashboard.js"></script>
-<script src="javaScript/donante-donar.js"></script>
+    <script src="javaScript/supabase-config.js"></script>
+    <script src="javaScript/donante-donar.js"></script>
 </body>
 </html>

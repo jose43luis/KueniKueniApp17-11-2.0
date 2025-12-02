@@ -1,6 +1,14 @@
-/* coordinador-eventos - DISEÑO MEJORADO */
+/* coordinador-eventos - CON ANIMACIONES SUTILES */
 /* Importar base */
 @import url('admin-eventos.css');
+
+/* ============================================
+   ANIMACIONES SUTILES GLOBALES
+   ============================================ */
+
+* {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 /* ============================================
    HEADER MEJORADO
@@ -40,27 +48,32 @@
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 8px #5f0d51;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(95, 13, 81, 0.3);
 }
 
 .btn-primary:hover {
-    background: #5f0d51;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(13, 95, 58, 0.3);
+    background: #7d1166;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(95, 13, 81, 0.4);
 }
 
 .btn-primary:active {
-    transform: translateY(0);
+    transform: translateY(-1px);
 }
 
 .btn-primary svg {
     width: 20px;
     height: 20px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover svg {
+    transform: rotate(90deg) scale(1.1);
 }
 
 /* ============================================
-   ESTADÍSTICAS MEJORADAS
+   ESTADÍSTICAS CON ANIMACIÓN
    ============================================ */
 
 .stats-grid {
@@ -78,9 +91,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .stat-card::before {
@@ -95,8 +109,8 @@
 
 .stat-card:hover {
     border-color: #0d5f3a;
-    box-shadow: 0 4px 12px rgba(13, 95, 58, 0.1);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(13, 95, 58, 0.15);
+    transform: translateY(-6px);
 }
 
 .stat-label {
@@ -112,6 +126,11 @@
     font-weight: 700;
     color: #18181b;
     line-height: 1;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover .stat-value {
+    transform: scale(1.05);
 }
 
 /* Colores específicos para cada stat */
@@ -132,7 +151,7 @@
 }
 
 /* ============================================
-   FILTROS MEJORADOS
+   FILTROS CON ANIMACIÓN
    ============================================ */
 
 .filtros-container {
@@ -146,6 +165,11 @@
     border-radius: 12px;
     border: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filtros-container:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .search-box {
@@ -161,6 +185,7 @@
     left: 1rem;
     color: #71717a;
     pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .search-box input {
@@ -169,15 +194,21 @@
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     font-size: 0.9375rem;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: #f9fafb;
 }
 
 .search-box input:focus {
     outline: none;
-    border-color: #0d5f3a;
+    border-color: #5f0d51;
     background: white;
-    box-shadow: 0 0 0 3px rgba(13, 95, 58, 0.1);
+    box-shadow: 0 0 0 3px rgba(95, 13, 81, 0.1);
+    transform: translateY(-2px);
+}
+
+.search-box:focus-within svg {
+    color: #5f0d51;
+    transform: scale(1.1);
 }
 
 .filtro-select {
@@ -188,7 +219,7 @@
     color: #3f3f46;
     background: #f9fafb;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     min-width: 180px;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -198,19 +229,21 @@
 }
 
 .filtro-select:hover {
-    border-color: #0d5f3a;
+    border-color: #5f0d51;
     background-color: white;
+    transform: translateY(-2px);
 }
 
 .filtro-select:focus {
     outline: none;
-    border-color: #0d5f3a;
+    border-color: #5f0d51;
     background-color: white;
-    box-shadow: 0 0 0 3px rgba(13, 95, 58, 0.1);
+    box-shadow: 0 0 0 3px rgba(95, 13, 81, 0.1);
+    transform: translateY(-2px);
 }
 
 /* ============================================
-   TABLA MEJORADA
+   TABLA CON ANIMACIÓN
    ============================================ */
 
 .table-container {
@@ -219,6 +252,11 @@
     border: 1px solid #e5e7eb;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table-container:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .data-table {
@@ -243,11 +281,12 @@
 
 .data-table tbody tr {
     border-bottom: 1px solid #f3f4f6;
-    transition: all 0.15s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .data-table tbody tr:hover {
     background: #fafafa;
+    transform: translateX(4px);
 }
 
 .data-table tbody tr:last-child {
@@ -262,7 +301,7 @@
 }
 
 /* ============================================
-   BADGES MEJORADOS
+   BADGES CON ANIMACIÓN
    ============================================ */
 
 .badge-categoria,
@@ -275,6 +314,12 @@
     font-size: 0.8125rem;
     font-weight: 600;
     white-space: nowrap;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.badge-categoria:hover,
+.badge-estado:hover {
+    transform: translateY(-2px) scale(1.05);
 }
 
 /* Estados */
@@ -325,7 +370,7 @@
 }
 
 /* ============================================
-   BOTONES DE ACCIÓN MEJORADOS
+   BOTONES DE ACCIÓN CON ANIMACIÓN
    ============================================ */
 
 .btn-icon {
@@ -338,22 +383,24 @@
     background: white;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-icon:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
 }
 
 .btn-icon svg {
     width: 18px;
     height: 18px;
     stroke: #52525b;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-icon:hover svg {
     stroke: #18181b;
+    transform: scale(1.1);
 }
 
 .btn-success {
@@ -362,7 +409,7 @@
 }
 
 .btn-success svg {
-    stroke: #5f0606;
+    stroke: #065f46;
 }
 
 .btn-success:hover {
@@ -399,6 +446,40 @@
 }
 
 /* ============================================
+   MODAL CON ANIMACIÓN
+   ============================================ */
+
+.modal-content {
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   FORM INPUTS CON ANIMACIÓN
+   ============================================ */
+
+.form-input,
+.form-textarea {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(95, 13, 81, 0.1);
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 
@@ -430,10 +511,14 @@
         width: 100%;
         justify-content: center;
     }
+
+    .data-table tbody tr:hover {
+        transform: translateX(0);
+    }
 }
 
 /* ============================================
-   ANIMACIONES
+   ANIMACIONES DE ENTRADA
    ============================================ */
 
 @keyframes fadeIn {
@@ -450,7 +535,7 @@
 .stat-card,
 .filtros-container,
 .table-container {
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn 0.4s ease-out;
 }
 
 .stat-card:nth-child(1) { animation-delay: 0.05s; }

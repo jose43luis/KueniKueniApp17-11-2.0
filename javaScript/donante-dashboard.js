@@ -63,41 +63,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // ============================================
-    // BOTONES "APOYAR PROYECTO"
-    // ============================================
-    const apoyarBtns = document.querySelectorAll('.btn-apoyar');
-    
-    apoyarBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const proyectoCard = this.closest('.proyecto-card');
-            const proyectoTitulo = proyectoCard.querySelector('h3').textContent;
-            const proyectoBadge = proyectoCard.querySelector('.proyecto-badge').textContent;
-            
-            console.log('Proyecto seleccionado:', proyectoTitulo);
-            console.log('Categoría:', proyectoBadge);
-            
-            // Mapear el título del proyecto al valor del select
-            const destinoMap = {
-                'Programa de Reforestación': 'reforestacion',
-                'Taller de Artesanías para Mujeres': 'artesanias',
-                'Torneo Deportivo Juvenil': 'deportivo'
-            };
-            
-            // Obtener el valor del destino
-            const destinoValue = destinoMap[proyectoTitulo] || 'general';
-            
-            // Guardar en sessionStorage
-            sessionStorage.setItem('destinoSeleccionado', destinoValue);
-            sessionStorage.setItem('proyectoNombre', proyectoTitulo);
-            
-            console.log('Destino guardado:', destinoValue);
-            
-            // Redirigir a página de donación
-            window.location.href = 'donante-donar.html';
-        });
-    });
-    
-    // ============================================
     // CARGAR ESTADÍSTICAS DEL USUARIO DESDE BD
     // ============================================
     async function cargarEstadisticasUsuario() {
