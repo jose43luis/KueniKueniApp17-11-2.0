@@ -378,14 +378,115 @@ function actualizarCambio(elementoId, porcentaje) {
 }
 
 function exportarReporte() {
-    const opciones = confirm('¿Deseas exportar en formato PDF?\n\nOK = PDF (profesional)\nCancelar = CSV (datos)');
+    // Contenedor del mensaje flotante
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    `;
 
-    if (opciones) {
-        exportarPDF();
-    } else {
-        exportarCSV();
-    }
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.5rem 1.75rem;
+        max-width: 360px;
+        width: 90%;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: #0f172a;
+    `;
+
+    modal.innerHTML = `
+        <h3 style="margin:0 0 0.25rem;font-size:1.1rem;font-weight:700;color:#111827;">
+            Exportar reporte
+        </h3>
+        <p style="margin:0 0 1rem;font-size:0.9rem;color:#6b7280;">
+            Elige el formato en el que deseas descargar el reporte del año actual.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.75rem;">
+            <button id="btnExportPDF" style="
+                width:100%;
+                padding:0.6rem 0.9rem;
+                border-radius:999px;
+                border:1px solid #5f0d51;
+                background:#5f0d51;
+                color:#fff;
+                font-size:0.9rem;
+                font-weight:600;
+                cursor:pointer;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                gap:0.4rem;
+            ">
+                <span>📄 PDF profesional</span>
+            </button>
+            <button id="btnExportCSV" style="
+                width:100%;
+                padding:0.6rem 0.9rem;
+                border-radius:999px;
+                border:1px solid #e5e7eb;
+                background:#f9fafb;
+                color:#111827;
+                font-size:0.9rem;
+                font-weight:600;
+                cursor:pointer;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                gap:0.4rem;
+            ">
+                <span>📊 CSV detallado</span>
+            </button>
+        </div>
+        <button id="btnExportCancelar" style="
+            width:100%;
+            margin-top:0.25rem;
+            padding:0.45rem 0.9rem;
+            border-radius:999px;
+            border:none;
+            background:transparent;
+            color:#6b7280;
+            font-size:0.85rem;
+            cursor:pointer;
+        ">
+            Cancelar
+        </button>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Cerrar helper
+    const cerrar = () => {
+        document.body.removeChild(overlay);
+    };
+
+    // Eventos
+    modal.querySelector('#btnExportPDF').addEventListener('click', async () => {
+        cerrar();
+        mostrarNotificacion('Generando reporte PDF profesional...', 'info');
+        await exportarPDF();
+    });
+
+    modal.querySelector('#btnExportCSV').addEventListener('click', async () => {
+        cerrar();
+        mostrarNotificacion('Generando archivo CSV limpio y estructurado...', 'info');
+        await exportarCSV();
+    });
+
+    modal.querySelector('#btnExportCancelar').addEventListener('click', cerrar);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cerrar();
+    });
 }
+
 
 function exportarCSV() {
     mostrarNotificacion('Generando archivo CSV mejorado y limpio...', 'info');
