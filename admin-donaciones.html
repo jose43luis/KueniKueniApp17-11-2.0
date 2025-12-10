@@ -184,59 +184,38 @@
                         </div>
                     </div>
 
-                    <!-- FILTROS AVANZADOS -->
-                    <div class="filters-container">
-                        <!-- Filtro por rango de fecha -->
-                        <div class="filter-group">
-                            <label for="filtroFechaDesde">Rango de fechas:</label>
-                            <div class="filter-dates">
-                                <input type="date" id="filtroFechaDesde">
-                                <span>a</span>
-                                <input type="date" id="filtroFechaHasta">
+                    <!-- Filtros -->
+                    <section class="socios-filtros">
+                        <div class="socios-filtros-row">
+                            <div class="filtro-group">
+                                <label for="inputBuscar">Buscar</label>
+                                <input type="text" id="inputBuscar" placeholder="Nombre o email...">
+                            </div>
+                            <div class="filtro-group">
+                                <label for="filtroOrdenar">Ordenar por</label>
+                                <select id="filtroOrdenar">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="montoAsc">Monto ascendente</option>
+                                    <option value="montoDesc">Monto descendente</option>
+                                    <option value="alfabetico">Alfabético (donante)</option>
+                                    <option value="fechaAsc">Fecha ascendente</option>
+                                    <option value="fechaDesc">Fecha descendente</option>
+                                </select>
+                            </div>
+                            <div class="filtro-group">
+                                <label>Rango de fechas</label>
+                                <div class="socios-fechas">
+                                    <input type="date" id="filtroFechaDesde">
+                                    <span>a</span>
+                                    <input type="date" id="filtroFechaHasta">
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Checkboxes de tipo de ordenamiento -->
-                        <div class="filter-group">
-                            <span>Ordenar por:</span>
-                            <div class="filter-checkboxes">
-                                <label>
-                                    <input type="checkbox" class="chk-orden" value="montoAsc">
-                                    Monto ascendente
-                                </label>
-                                <label>
-                                    <input type="checkbox" class="chk-orden" value="montoDesc">
-                                    Monto descendente
-                                </label>
-                                <label>
-                                    <input type="checkbox" class="chk-orden" value="alfabetico">
-                                    Alfabético (donante)
-                                </label>
-                                <label>
-                                    <input type="checkbox" class="chk-orden" value="fechaAsc">
-                                    Fecha ascendente
-                                </label>
-                                <label>
-                                    <input type="checkbox" class="chk-orden" value="fechaDesc">
-                                    Fecha descendente
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="filter-actions">
+                        <div class="socios-filtros-actions">
                             <button id="btnAplicarFiltros" class="btn-secondary">Aplicar filtros</button>
                             <button id="btnLimpiarFiltros" class="btn-tertiary">Limpiar</button>
                         </div>
-                    </div>
-
-                    <!-- Barra de búsqueda -->
-                    <div class="search-bar">
-                        <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 17C13.4183 17 17 13.4183 17 9C17 4.58172 13.4183 1 9 1C4.58172 1 1 4.58172 1 9C1 13.4183 4.58172 17 9 17Z" stroke="#71717a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M19 19L14.65 14.65" stroke="#71717a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <input type="text" id="inputBuscar" placeholder="Buscar por nombre o email..." class="search-input">
-                    </div>
+                    </section>
 
                     <!-- Tabla de donaciones -->
                     <div class="table-wrapper">

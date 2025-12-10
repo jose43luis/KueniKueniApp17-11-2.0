@@ -129,31 +129,34 @@
         </div>
 
         <!-- Filtros -->
-        <div class="filtros-container">
-            <div class="search-box">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <input type="text" id="inputBuscar" placeholder="Buscar noticias...">
+        <section class="socios-filtros">
+            <div class="socios-filtros-row">
+                <div class="filtro-group">
+                    <label for="inputBuscar">Buscar</label>
+                    <input type="text" id="inputBuscar" placeholder="Buscar noticias...">
+                </div>
+                <div class="filtro-group">
+                    <label for="filtroEstado">Estado</label>
+                    <select id="filtroEstado">
+                        <option value="">Todos los estados</option>
+                        <option value="publicado">Publicado</option>
+                        <option value="borrador">Borrador</option>
+                        <option value="archivado">Archivado</option>
+                    </select>
+                </div>
+                <div class="filtro-group">
+                    <label for="filtroCategoria">Categoría</label>
+                    <select id="filtroCategoria">
+                        <option value="">Todas las categorías</option>
+                        <option value="Medio Ambiente">Medio Ambiente</option>
+                        <option value="Deportes">Deportes</option>
+                        <option value="Cultura">Cultura</option>
+                        <option value="Emprendimiento">Emprendimiento</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
             </div>
-            
-            <select id="filtroEstado" class="filtro-select">
-                <option value="">Todos los estados</option>
-                <option value="publicado">Publicado</option>
-                <option value="borrador">Borrador</option>
-                <option value="archivado">Archivado</option>
-            </select>
-            
-            <select id="filtroCategoria" class="filtro-select">
-                <option value="">Todas las categorías</option>
-                <option value="Medio Ambiente">Medio Ambiente</option>
-                <option value="Deportes">Deportes</option>
-                <option value="Cultura">Cultura</option>
-                <option value="Emprendimiento">Emprendimiento</option>
-                <option value="General">General</option>
-            </select>
-        </div>
+        </section>
 
         <!-- Tabla de Noticias -->
         <div class="table-container">

@@ -107,22 +107,15 @@
             <button id="btnNuevoEvento" class="btn-primary">Nuevo Evento</button>
         </div>
 
-        <!-- FILTROS GLOBALES (para todos los paneles) -->
-        <section class="event-filters">
-            <div class="filter-row">
-                <!-- Rango de fechas -->
-                <div class="filter-group">
-                    <label for="filtroFechaDesde">Rango de fechas</label>
-                    <div class="filter-dates">
-                        <input type="date" id="filtroFechaDesde">
-                        <span>a</span>
-                        <input type="date" id="filtroFechaHasta">
-                    </div>
+        <!-- Filtros -->
+        <section class="socios-filtros">
+            <div class="socios-filtros-row">
+                <div class="filtro-group">
+                    <label for="filtroBusqueda">Buscar</label>
+                    <input type="text" id="filtroBusqueda" placeholder="Título, ubicación, descripción...">
                 </div>
-
-                <!-- Categoría / Actividad -->
-                <div class="filter-group">
-                    <label for="filtroCategoria">Categoría / actividad</label>
+                <div class="filtro-group">
+                    <label for="filtroCategoria">Categoría</label>
                     <select id="filtroCategoria">
                         <option value="">Todas</option>
                         <option value="Educación">Educación</option>
@@ -133,17 +126,16 @@
                         <option value="Otro">Otro</option>
                     </select>
                 </div>
-
-                <!-- Búsqueda por título / ubicación -->
-                <div class="filter-group">
-                    <label for="filtroBusqueda">Buscar</label>
-                    <div class="filter-search">
-                        <input type="text" id="filtroBusqueda" placeholder="Título, ubicación, descripción...">
+                <div class="filtro-group">
+                    <label>Rango de fechas</label>
+                    <div class="socios-fechas">
+                        <input type="date" id="filtroFechaDesde">
+                        <span>a</span>
+                        <input type="date" id="filtroFechaHasta">
                     </div>
                 </div>
             </div>
-
-            <div class="filter-actions">
+            <div class="socios-filtros-actions">
                 <button id="btnAplicarFiltrosEventos" class="btn-secondary">Aplicar filtros</button>
                 <button id="btnLimpiarFiltrosEventos" class="btn-tertiary">Limpiar</button>
             </div>
