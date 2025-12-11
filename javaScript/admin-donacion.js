@@ -383,6 +383,9 @@ function aplicarFiltrosYRedibujar() {
 
     // 1) Filtrar por texto
     let resultado = [...donacionesGlobal];
+    
+    // Variable para saber si se está buscando
+    let hayBusqueda = termino || fechaDesde || fechaHasta;
 
     if (termino) {
         resultado = resultado.filter(donacion => {
@@ -419,7 +422,8 @@ function aplicarFiltrosYRedibujar() {
     paginaActual = Math.min(paginaActual, calcularTotalPaginas());
     if (paginaActual < 1) paginaActual = 1;
 
-    mostrarDonacionesPaginadas();
+    // Pasar información de si hay búsqueda activa
+    mostrarDonacionesPaginadas(hayBusqueda);
     actualizarControlesPaginacion();
 }
 
@@ -483,7 +487,11 @@ function cambiarPagina(delta) {
     if (paginaActual < 1) paginaActual = 1;
     if (paginaActual > totalPaginas) paginaActual = totalPaginas;
 
-    mostrarDonacionesPaginadas();
+    // Necesitamos saber si hay búsqueda activa
+    const { termino, fechaDesde, fechaHasta } = obtenerFiltrosUI();
+    const hayBusqueda = termino || fechaDesde || fechaHasta;
+
+    mostrarDonacionesPaginadas(hayBusqueda);
     actualizarControlesPaginacion();
 }
 
@@ -501,7 +509,7 @@ function actualizarControlesPaginacion() {
     if (btnNext) btnNext.disabled = paginaActual >= totalPaginas;
 }
 
-function mostrarDonacionesPaginadas() {
+function mostrarDonacionesPaginadas(hayBusqueda = false) {
     const tbody = document.getElementById('tablaDonaciones');
     if (!tbody) {
         console.error('No se encontró la tabla');
@@ -510,11 +518,22 @@ function mostrarDonacionesPaginadas() {
 
     const { nombreMes } = obtenerRangoMesSeleccionado();
 
+    // CAMBIO IMPORTANTE: Diferenciar entre "no hay datos del mes" vs "búsqueda sin resultados"
     if (!donacionesFiltradas || donacionesFiltradas.length === 0) {
+        let mensaje = '';
+        
+        if (hayBusqueda) {
+            // Si hay una búsqueda activa y no hay resultados
+            mensaje = '❌ No hay una persona con ese nombre en donaciones';
+        } else {
+            // Si no hay búsqueda, simplemente no hay donaciones ese mes
+            mensaje = `No hay donaciones registradas en ${nombreMes}`;
+        }
+        
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
-                    No hay donaciones registradas en ${nombreMes}
+                <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280; font-size: 1rem;">
+                    ${mensaje}
                 </td>
             </tr>
         `;
@@ -926,4 +945,5 @@ function mostrarError(mensaje) {
     }
 }
 
-console.log('Sistema de donaciones con filtros, paginación y exportación cargado');
+console.log('✅ Sistema de donaciones con filtros, paginación y exportación cargado');
+console.log('✅ CORREGIDO: Mensaje de búsqueda sin resultados personalizado');
