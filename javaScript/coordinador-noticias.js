@@ -518,7 +518,7 @@ function mostrarNoticias(noticias) {
                     </div>
                 </td>
                 <td><span class="badge-categoria ${categoriaBadge.clase}">${categoriaBadge.texto}</span></td>
-                <td style="font-size:0.875rem;color:#6b7280;">${noticia.autor || 'Coordinador'}</td>
+                <td style="font-size:0.875rem;color:#6b7280;">${noticia.autor_nombre || 'Coordinador'}</td>
                 <td style="font-size:0.875rem;color:#6b7280;">${formatearFecha(noticia.fecha_publicacion)}</td>
                 <td><span class="badge-estado ${estadoBadge.clase}">${estadoBadge.texto}</span></td>
                 <td style="text-align:center;font-weight:600;color:#18181b;">${noticia.vistas || 0}</td>
@@ -620,14 +620,17 @@ async function guardarNoticia() {
             fechaPublicacion = new Date().toISOString().split('T')[0];
         }
         
-        // CAMBIO IMPORTANTE: Se eliminó el campo 'autor' porque no existe en la tabla de Supabase
+        // Obtener el nombre del autor desde sessionStorage
+        const autorNombre = sessionStorage.getItem('userName') || 'Coordinador';
+        
         const datos = {
             titulo: document.getElementById('titulo').value.trim(),
             categoria: document.getElementById('categoria').value,
             contenido: document.getElementById('contenido').value.trim(),
             imagen_url: imagenUrl || null,
             estado: document.getElementById('estado').value,
-            fecha_publicacion: fechaPublicacion
+            fecha_publicacion: fechaPublicacion,
+            autor_nombre: autorNombre
         };
 
         // Validar que los campos requeridos no estén vacíos
@@ -787,4 +790,4 @@ console.log('✅ Sistema MEJORADO cargado');
 console.log('✅ Paginación: 5 noticias por página');
 console.log('✅ Alertas personalizadas');
 console.log('✅ Animaciones sutiles');
-console.log('✅ CORREGIDO: Campo "autor" eliminado de guardarNoticia()');
+console.log('✅ CORREGIDO: Campo "autor_nombre" incluido en guardarNoticia()');
