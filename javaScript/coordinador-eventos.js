@@ -72,6 +72,53 @@ function configurarEventos() {
     document.getElementById('inputBuscar')?.addEventListener('input', filtrarEventos);
     document.getElementById('filtroEstado')?.addEventListener('change', filtrarEventos);
     document.getElementById('filtroCategoria')?.addEventListener('change', filtrarEventos);
+
+    // Configurar menú hamburguesa para móviles
+    configurarMenuMobile();
+}
+
+function configurarMenuMobile() {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    if (!menuToggle || !sidebar) return;
+
+    // Crear overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    overlay.id = 'sidebarOverlay';
+    document.body.appendChild(overlay);
+
+    // Toggle sidebar
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    });
+
+    // Cerrar al hacer clic en overlay
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+
+    // Cerrar al hacer clic en un link del menú
+    const navLinks = sidebar.querySelectorAll('.nav-item, .btn-cerrar-sesion');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        });
+    });
+
+    // Cerrar sidebar al cambiar tamaño de ventana
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+    });
 }
 
 // ============================================
@@ -588,99 +635,77 @@ async function gestionarAsistencias(eventoId) {
         }
         console.log('✅ Evento cargado:', evento);
         
-        // Obtener las asistencias del evento
+        // Obtener las asistencias del evento con JOIN de socios y usuarios en UNA SOLA QUERY
+        // Esto mejora dramáticamente el rendimiento (1 query vs 100+ queries)
         const { data: asistencias, error: errorAsistencias } = await window.supabaseClient
-            .from('asistencias_eventos')
-            .select('*')
+            .from('asistencias')
+            .select(`
+                *,
+                socios!inner (
+                    id,
+                    usuario_id,
+                    usuarios (*)
+                )
+            `)
             .eq('evento_id', eventoId);
-        
+
         if (errorAsistencias) {
             console.error('❌ Error cargando asistencias:', errorAsistencias);
             throw errorAsistencias;
         }
-        console.log('✅ Asistencias del evento:', asistencias);
-        console.log('📝 Cantidad de asistencias:', asistencias?.length || 0);
-        
+
+        console.log('✅ Asistencias del evento cargadas:', asistencias?.length || 0);
+
         // Si no hay asistencias, mostrar el modal vacío
         if (!asistencias || asistencias.length === 0) {
             console.log('ℹ️ No hay asistencias para este evento');
             mostrarModalAsistencias(evento, []);
             return;
         }
-        
-        // Ahora obtener los datos de los socios para cada asistencia
-        const asistenciasCompletas = [];
-        
-        for (const asistencia of asistencias) {
-            try {
-                console.log('👤 Procesando asistencia:', asistencia.id);
-                
-                // Obtener el socio
-                const { data: socio, error: errorSocio } = await window.supabaseClient
-                    .from('socios')
-                    .select('*')
-                    .eq('id', asistencia.socio_id)
-                    .single();
-                
-                if (errorSocio) {
-                    console.warn('⚠️ No se pudo cargar socio:', asistencia.socio_id, errorSocio);
-                    asistenciasCompletas.push({
-                        ...asistencia,
-                        socio: {
-                            nombre_completo: 'Socio no encontrado',
-                            email: 'N/A'
-                        }
-                    });
-                    continue;
-                }
-                
-                console.log('✅ Socio cargado:', socio);
-                
-                // Obtener nombre y email del usuario
-                let nombreCompleto = 'N/A';
-                let email = 'N/A';
-                
-                if (socio.usuario_id) {
-                    const { data: usuario, error: errorUsuario } = await window.supabaseClient
-                        .from('usuarios')
-                        .select('*')
-                        .eq('id', socio.usuario_id)
-                        .single();
-                    
-                    if (errorUsuario) {
-                        console.warn('⚠️ No se pudo cargar usuario:', socio.usuario_id, errorUsuario);
-                    } else if (usuario) {
-                        console.log('✅ Usuario cargado:', usuario);
-                        
-                        // Intentar obtener el nombre de diferentes posibles columnas
-                        nombreCompleto = usuario.nombre_completo || 
-                                       usuario.nombreCompleto || 
-                                       usuario.nombre || 
-                                       usuario.full_name ||
-                                       usuario.name ||
-                                       'N/A';
-                        
-                        email = usuario.email || 'N/A';
-                        
-                        console.log('📝 Nombre:', nombreCompleto);
-                        console.log('📧 Email:', email);
-                    }
-                }
-                
-                asistenciasCompletas.push({
-                    ...asistencia,
-                    socio: {
-                        nombre_completo: nombreCompleto,
-                        email: email
-                    }
-                });
-            } catch (err) {
-                console.error('❌ Error procesando asistencia:', err);
-            }
+
+        // Obtener también los registros de asistencias_eventos (pase de lista)
+        const { data: asistenciasEventos } = await window.supabaseClient
+            .from('asistencias_eventos')
+            .select('socio_id, estado')
+            .eq('evento_id', eventoId);
+
+        // Crear un mapa para acceso rápido al estado del pase de lista
+        const paseLista = new Map();
+        if (asistenciasEventos) {
+            asistenciasEventos.forEach(ae => {
+                paseLista.set(ae.socio_id, ae.estado);
+            });
         }
-        
-        console.log('✅ Total de asistencias completas:', asistenciasCompletas.length);
-        console.log('📋 Asistencias completas:', asistenciasCompletas);
+
+        // Procesar asistencias con datos ya cargados (sin queries adicionales)
+        const asistenciasCompletas = asistencias.map(asistencia => {
+            // Obtener datos del usuario desde la relación
+            const usuario = asistencia.socios?.usuarios;
+
+            // Intentar obtener el nombre de diferentes posibles columnas
+            const nombreCompleto = usuario?.nombre_completo ||
+                                  usuario?.nombreCompleto ||
+                                  usuario?.nombre ||
+                                  usuario?.full_name ||
+                                  usuario?.name ||
+                                  'Socio sin datos';
+
+            const email = usuario?.email || 'N/A';
+
+            // Obtener estado del pase de lista (si existe)
+            const estadoPaseLista = paseLista.get(asistencia.socio_id);
+
+            return {
+                ...asistencia,
+                estado_pase_lista: estadoPaseLista || null, // null = no se ha tomado lista
+                socio: {
+                    nombre_completo: nombreCompleto,
+                    email: email
+                }
+            };
+        });
+
+        console.log('✅ Asistencias procesadas:', asistenciasCompletas.length);
         mostrarModalAsistencias(evento, asistenciasCompletas);
         
     } catch (error) {
@@ -693,13 +718,14 @@ window.gestionarAsistencias = gestionarAsistencias;
 
 function mostrarModalAsistencias(evento, asistencias) {
     const totalAsistentes = asistencias.length;
-    const confirmados = asistencias.filter(a => a.estado === 'confirmado').length;
-    const asistieron = asistencias.filter(a => a.estado === 'asistio').length;
-    const noAsistieron = asistencias.filter(a => a.estado === 'no_asistio').length;
-    
-    // Separar asistencias por estado
-    const confirmadosLista = asistencias.filter(a => a.estado === 'confirmado');
-    const asistieronLista = asistencias.filter(a => a.estado === 'asistio');
+    // Contar por estado del pase de lista
+    const confirmados = asistencias.filter(a => !a.estado_pase_lista).length; // No tienen pase de lista aún
+    const asistieron = asistencias.filter(a => a.estado_pase_lista === 'asistio').length;
+    const noAsistieron = asistencias.filter(a => a.estado_pase_lista === 'no_asistio').length;
+
+    // Separar asistencias por estado del pase de lista
+    const confirmadosLista = asistencias.filter(a => !a.estado_pase_lista); // Pendientes de tomar lista
+    const asistieronLista = asistencias.filter(a => a.estado_pase_lista === 'asistio');
     
     const modalHTML = `
         <div id="modalAsistencias" class="modal" style="display:flex;">
@@ -1021,14 +1047,30 @@ function mostrarModalAsistencias(evento, asistencias) {
 async function marcarAsistio(asistenciaId) {
     try {
         console.log('✓ Marcando asistencia:', asistenciaId);
-        
+
+        // Primero obtener los datos de la asistencia confirmada
+        const { data: asistencia, error: errorGet } = await window.supabaseClient
+            .from('asistencias')
+            .select('evento_id, socio_id')
+            .eq('id', asistenciaId)
+            .single();
+
+        if (errorGet) throw errorGet;
+
+        // Insertar o actualizar en asistencias_eventos (pase de lista)
         const { error } = await window.supabaseClient
             .from('asistencias_eventos')
-            .update({ estado: 'asistio' })
-            .eq('id', asistenciaId);
-        
+            .upsert({
+                evento_id: asistencia.evento_id,
+                socio_id: asistencia.socio_id,
+                estado: 'asistio',
+                fecha_registro: new Date().toISOString()
+            }, {
+                onConflict: 'evento_id,socio_id'
+            });
+
         if (error) throw error;
-        
+
         mostrarMensaje('✅ Asistencia confirmada', 'success');
         await gestionarAsistencias(eventoAsistenciaActual);
     } catch (error) {
@@ -1046,14 +1088,30 @@ async function marcarNoAsistio(asistenciaId) {
         async () => {
             try {
                 console.log('✗ Marcando no asistió:', asistenciaId);
-                
+
+                // Primero obtener los datos de la asistencia confirmada
+                const { data: asistencia, error: errorGet } = await window.supabaseClient
+                    .from('asistencias')
+                    .select('evento_id, socio_id')
+                    .eq('id', asistenciaId)
+                    .single();
+
+                if (errorGet) throw errorGet;
+
+                // Insertar o actualizar en asistencias_eventos (pase de lista)
                 const { error } = await window.supabaseClient
                     .from('asistencias_eventos')
-                    .update({ estado: 'no_asistio' })
-                    .eq('id', asistenciaId);
-                
+                    .upsert({
+                        evento_id: asistencia.evento_id,
+                        socio_id: asistencia.socio_id,
+                        estado: 'no_asistio',
+                        fecha_registro: new Date().toISOString()
+                    }, {
+                        onConflict: 'evento_id,socio_id'
+                    });
+
                 if (error) throw error;
-                
+
                 mostrarMensaje('✅ Marcado como no asistió', 'success');
                 await gestionarAsistencias(eventoAsistenciaActual);
             } catch (error) {
