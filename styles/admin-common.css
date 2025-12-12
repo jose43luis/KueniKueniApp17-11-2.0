@@ -55,7 +55,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    color: var(--text-primary);
+    color: #fcfcfc;
     background: var(--bg-primary);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -89,7 +89,7 @@ body {
 
 .page-header p {
     font-size: 1.125rem;
-    color: var(--text-secondary);
+    color: #ffffff;
     margin: 0;
     font-weight: 400;
 }

@@ -1,0 +1,576 @@
+/* ===================================
+   ESTILOS PARA ADMIN MENSAJES
+   =================================== */
+
+.content-wrapper {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.mensajes-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+/* ===================================
+   TARJETA DE MENSAJE
+   =================================== */
+
+.mensaje-card,
+.historial-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #661159 0%, #661159 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* ===================================
+   FORMULARIO
+   =================================== */
+
+.mensaje-form {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.form-group label svg {
+    width: 20px;
+    height: 20px;
+    color: #661159;
+}
+
+.form-group select,
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.form-group select:focus,
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #661159;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 200px;
+    line-height: 1.6;
+}
+
+/* ===================================
+   INFORMACIÓN DESTINATARIO
+   =================================== */
+
+.destinatario-info {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background: #F3F4F6;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #6B7280;
+    font-size: 0.875rem;
+}
+
+.info-value {
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+/* ===================================
+   PLANTILLAS
+   =================================== */
+
+.plantillas-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+}
+
+.btn-plantilla {
+    padding: 1rem;
+    border: 2px solid #E5E7EB;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.btn-plantilla svg {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-plantilla:hover {
+    border-color: #661159;
+    background: #FFF5F5;
+    color: #661159;
+    transform: translateY(-2px);
+}
+
+.btn-plantilla:active {
+    transform: translateY(0);
+}
+
+/* ===================================
+   EDITOR INFO
+   =================================== */
+
+.editor-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #6B7280;
+}
+
+.char-count {
+    font-weight: 500;
+}
+
+.editor-tip {
+    color: #9CA3AF;
+    font-style: italic;
+}
+
+/* ===================================
+   VISTA PREVIA
+   =================================== */
+
+.mensaje-preview {
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+.preview-header {
+    background: linear-gradient(135deg, #661159 0%, #661159 100%);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.preview-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+}
+
+.preview-logo svg {
+    width: 32px;
+    height: 32px;
+}
+
+.preview-logo span {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.preview-content {
+    padding: 2rem;
+    min-height: 200px;
+    line-height: 1.8;
+    color: #374151;
+    background: #FAFAFA;
+}
+
+.preview-placeholder {
+    text-align: center;
+    color: #9CA3AF;
+    font-style: italic;
+}
+
+.preview-content p {
+    margin-bottom: 1rem;
+    white-space: pre-wrap;
+}
+
+.preview-footer {
+    background: #F3F4F6;
+    padding: 1rem 2rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #6B7280;
+}
+
+.preview-footer p {
+    margin: 0.25rem 0;
+}
+
+/* ===================================
+   BOTONES DE ACCIÓN
+   =================================== */
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #E5E7EB;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #661159 0%, #661159 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.btn-secondary {
+    background: white;
+    color: #374151;
+    border: 2px solid #E5E7EB;
+}
+
+.btn-secondary:hover {
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+}
+
+.btn-primary svg,
+.btn-secondary svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ===================================
+   HISTORIAL
+   =================================== */
+
+.historial-lista {
+    padding: 1.5rem;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.historial-item {
+    padding: 1rem;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.historial-item:hover {
+    border-color: #661159;
+    background: #FFF5F5;
+}
+
+.historial-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.5rem;
+}
+
+.historial-destinatario {
+    font-weight: 600;
+    color: #374151;
+}
+
+.historial-fecha {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+}
+
+.historial-asunto {
+    font-size: 0.875rem;
+    color: #6B7280;
+    margin-bottom: 0.5rem;
+}
+
+.historial-preview {
+    font-size: 0.875rem;
+    color: #9CA3AF;
+    line-height: 1.5;
+    max-height: 3em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.historial-vacio {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #9CA3AF;
+}
+
+.historial-vacio svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* ===================================
+   MODAL
+   =================================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid #E5E7EB;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #374151;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #9CA3AF;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+}
+
+.modal-close:hover {
+    color: #374151;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.confirmacion-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #F3F4F6;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.confirmacion-info strong {
+    color: #374151;
+    font-size: 1.1rem;
+}
+
+.confirmacion-info span {
+    color: #6B7280;
+    font-size: 0.875rem;
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 2px solid #E5E7EB;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* ===================================
+   LOADING OVERLAY
+   =================================== */
+
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.loading-overlay.show {
+    display: flex;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-overlay p {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* ===================================
+   RESPONSIVE
+   =================================== */
+
+@media (max-width: 1024px) {
+    .mensajes-container {
+        grid-template-columns: 1fr;
+    }
+
+    .historial-card {
+        order: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 1rem;
+    }
+
+    .mensaje-form {
+        padding: 1.5rem;
+    }
+
+    .plantillas-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+}

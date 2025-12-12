@@ -884,7 +884,240 @@ app.post('/send-donation-notification', async (req, res) => {
     }
 });
 
+// ===================================================
+// ENVIAR MENSAJE PERSONALIZADO A SOCIO
+// ===================================================
+app.post('/send-custom-message', async (req, res) => {
+    const { email, nombre, asunto, mensaje } = req.body;
 
+    console.log('Solicitud de mensaje personalizado:', { email, nombre, asunto });
+
+    try {
+        if (!email || !nombre || !asunto || !mensaje) {
+            return res.status(400).json({
+                success: false,
+                error: 'Faltan datos requeridos'
+            });
+        }
+
+        const contenidoHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        line-height: 1.8;
+                        color: #333;
+                        margin: 0;
+                        padding: 0;
+                        background-color: #f5f5f5;
+                    }
+                    .container {
+                        max-width: 650px;
+                        margin: 30px auto;
+                        background: white;
+                        border-radius: 16px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                    }
+                    .header {
+                        background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
+                        color: white;
+                        padding: 50px 40px;
+                        text-align: center;
+                    }
+                    .logo {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 12px;
+                        margin-bottom: 15px;
+                    }
+                    .logo-icon {
+                        width: 48px;
+                        height: 48px;
+                        background: rgba(255, 255, 255, 0.2);
+                        border-radius: 12px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .logo-text {
+                        font-size: 32px;
+                        font-weight: 700;
+                        letter-spacing: -0.5px;
+                    }
+                    .subtitle {
+                        font-size: 14px;
+                        opacity: 0.9;
+                        margin-top: 8px;
+                    }
+                    .content {
+                        padding: 50px 40px;
+                    }
+                    .greeting {
+                        font-size: 24px;
+                        font-weight: 600;
+                        color: #FF6B6B;
+                        margin-bottom: 30px;
+                    }
+                    .message-content {
+                        font-size: 16px;
+                        line-height: 1.8;
+                        color: #4B5563;
+                        margin-bottom: 40px;
+                        white-space: pre-wrap;
+                    }
+                    .signature {
+                        margin-top: 40px;
+                        padding-top: 30px;
+                        border-top: 2px solid #F3F4F6;
+                    }
+                    .signature-text {
+                        color: #6B7280;
+                        font-size: 15px;
+                        font-style: italic;
+                    }
+                    .signature-name {
+                        color: #374151;
+                        font-weight: 600;
+                        font-size: 16px;
+                        margin-top: 10px;
+                    }
+                    .footer {
+                        background: #F9FAFB;
+                        padding: 40px;
+                        text-align: center;
+                    }
+                    .footer-logo {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 10px;
+                        margin-bottom: 20px;
+                        color: #FF6B6B;
+                    }
+                    .footer-logo svg {
+                        width: 24px;
+                        height: 24px;
+                    }
+                    .footer-logo-text {
+                        font-size: 18px;
+                        font-weight: 600;
+                    }
+                    .footer-text {
+                        color: #6B7280;
+                        font-size: 14px;
+                        margin: 8px 0;
+                    }
+                    .footer-divider {
+                        width: 60px;
+                        height: 3px;
+                        background: linear-gradient(90deg, transparent, #FF6B6B, transparent);
+                        margin: 20px auto;
+                    }
+                    .social-links {
+                        margin: 25px 0;
+                    }
+                    .social-link {
+                        display: inline-block;
+                        margin: 0 12px;
+                        color: #FF6B6B;
+                        text-decoration: none;
+                        font-weight: 500;
+                        font-size: 14px;
+                        transition: opacity 0.3s;
+                    }
+                    .social-link:hover {
+                        opacity: 0.7;
+                    }
+                    .copyright {
+                        color: #9CA3AF;
+                        font-size: 13px;
+                        margin-top: 20px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <div class="logo">
+                            <div class="logo-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                            </div>
+                            <div class="logo-text">Kueni Kueni</div>
+                        </div>
+                        <div class="subtitle">Paso a Paso</div>
+                    </div>
+                    <div class="content">
+                        <div class="greeting">
+                            ¡Hola ${nombre}! 👋
+                        </div>
+                        <div class="message-content">
+${mensaje}
+                        </div>
+                        <div class="signature">
+                            <div class="signature-text">Con cariño,</div>
+                            <div class="signature-name">El equipo de Kueni Kueni</div>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <div class="footer-logo">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                            <span class="footer-logo-text">Kueni Kueni</span>
+                        </div>
+                        <div class="footer-divider"></div>
+                        <p class="footer-text"><strong>Asociación Civil sin fines de lucro</strong></p>
+                        <p class="footer-text">Abasolo 27, Barrio las Flores</p>
+                        <p class="footer-text">Asunción Nochixtlán, Oaxaca, México</p>
+                        <div class="social-links">
+                            <a href="https://www.facebook.com/cuenicuenicolectivo" class="social-link">Facebook</a>
+                            <a href="https://www.instagram.com/kueni.kuenicolectivo" class="social-link">Instagram</a>
+                        </div>
+                        <p class="copyright">
+                            © 2025 Kueni Kueni. Todos los derechos reservados.
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        const resultado = await enviarCorreoBrevo(
+            email,
+            asunto,
+            contenidoHTML
+        );
+
+        if (resultado.success) {
+            console.log(`✅ Mensaje personalizado enviado a: ${email}`);
+            res.json({
+                success: true,
+                message: 'Mensaje enviado correctamente',
+                messageId: resultado.messageId
+            });
+        } else {
+            console.error('❌ Error al enviar mensaje:', resultado.error);
+            res.status(500).json({
+                success: false,
+                error: 'Error al enviar el mensaje',
+                details: resultado.error
+            });
+        }
+
+    } catch (error) {
+        console.error('❌ Error al procesar mensaje personalizado:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
 
 // ===================================================
 // INICIAR SERVIDOR
