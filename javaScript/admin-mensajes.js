@@ -383,19 +383,21 @@ async function confirmarEnvio() {
     cerrarModal();
     mostrarLoading(true);
 
+    // Guardar datos del socio ANTES de cualquier cosa
+    const socioGuardado = {
+        id: selectedSocio.id,
+        nombre: selectedSocio.nombre,
+        email: selectedSocio.email
+    };
+
     try {
         const asunto = document.getElementById('asuntoMensaje').value;
         const contenido = document.getElementById('contenidoMensaje').value;
 
         // Reemplazar {nombre} con el nombre real
-        const contenidoFinal = contenido.replace(/{nombre}/gi, selectedSocio.nombre);
+        const contenidoFinal = contenido.replace(/{nombre}/gi, socioGuardado.nombre);
 
         console.log('Enviando mensaje a servidor...');
-        console.log('Datos:', {
-            email: selectedSocio.email,
-            nombre: selectedSocio.nombre,
-            asunto: asunto
-        });
 
         // Enviar correo
         const response = await fetch('https://kuenikueniapp17-11-2-0.onrender.com/send-custom-message', {
@@ -404,8 +406,8 @@ async function confirmarEnvio() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                email: selectedSocio.email,
-                nombre: selectedSocio.nombre,
+                email: socioGuardado.email,
+                nombre: socioGuardado.nombre,
                 asunto: asunto,
                 mensaje: contenidoFinal
             })
@@ -428,15 +430,20 @@ async function confirmarEnvio() {
         console.log('Respuesta del servidor:', data);
 
         if (data.success) {
-            mostrarNotificacion('¡Mensaje enviado correctamente!', 'success');
+            // Guardar en historial ANTES de limpiar
+            guardarEnHistorial(socioGuardado, asunto, contenidoFinal);
+            
+            // Limpiar formulario
             limpiarFormulario();
-            guardarEnHistorial(selectedSocio, asunto, contenidoFinal);
+            
+            // Mostrar notificación de éxito estilo SweetAlert
+            mostrarNotificacionExito(socioGuardado.email);
         } else {
             throw new Error(data.error || 'Error al enviar el mensaje');
         }
     } catch (error) {
         console.error('❌ Error al enviar:', error);
-        mostrarNotificacion('Error al enviar el mensaje: ' + error.message, 'error');
+        mostrarNotificacionError(error.message);
     } finally {
         mostrarLoading(false);
     }
@@ -600,7 +607,183 @@ style.textContent = `
             opacity: 0;
         }
     }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
 `;
 document.head.appendChild(style);
+
+// Notificación de éxito estilo SweetAlert
+function mostrarNotificacionExito(email) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    `;
+
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.3s ease;
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #5f0d51 0%, #8b1a7a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px auto;
+        ">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <h2 style="
+            font-size: 28px;
+            font-weight: 700;
+            color: #1F2937;
+            margin: 0 0 12px 0;
+        ">¡Mensaje Enviado!</h2>
+        <p style="
+            font-size: 16px;
+            color: #6B7280;
+            margin: 0 0 8px 0;
+            line-height: 1.6;
+        ">El correo ha sido enviado exitosamente a:</p>
+        <p style="
+            font-size: 16px;
+            font-weight: 600;
+            color: #5f0d51;
+            margin: 0 0 32px 0;
+        ">${email}</p>
+        <button onclick="this.parentElement.parentElement.remove()" style="
+            background: linear-gradient(135deg, #5f0d51 0%, #8b1a7a 100%);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(95, 13, 81, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">Aceptar</button>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Cerrar al hacer click fuera del modal
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.remove();
+        }
+    });
+}
+
+// Notificación de error estilo SweetAlert
+function mostrarNotificacionError(mensajeError) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    `;
+
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.3s ease;
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px auto;
+        ">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </div>
+        <h2 style="
+            font-size: 28px;
+            font-weight: 700;
+            color: #1F2937;
+            margin: 0 0 12px 0;
+        ">Error al Enviar</h2>
+        <p style="
+            font-size: 16px;
+            color: #6B7280;
+            margin: 0 0 32px 0;
+            line-height: 1.6;
+        ">${mensajeError}</p>
+        <button onclick="this.parentElement.parentElement.remove()" style="
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">Aceptar</button>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Cerrar al hacer click fuera del modal
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.remove();
+        }
+    });
+}
 
 console.log('✅ Sistema de mensajes cargado');
