@@ -411,7 +411,20 @@ async function confirmarEnvio() {
             })
         });
 
-        const data = await response.json();
+        // Verificar si la respuesta es exitosa
+        if (!response.ok) {
+            throw new Error(`Error del servidor (${response.status}): ${response.statusText}`);
+        }
+
+        // Intentar parsear JSON
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            console.error('Error al parsear JSON:', jsonError);
+            throw new Error('El servidor no devolvió una respuesta válida');
+        }
+
         console.log('Respuesta del servidor:', data);
 
         if (data.success) {
