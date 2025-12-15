@@ -14,9 +14,9 @@ let eventosCompletados = [];
 let paginaActualProximos = 1;
 let paginaActualEnCurso = 1;
 let paginaActualCompletados = 1;
-let itemsPorPaginaProximos = 6;
-let itemsPorPaginaEnCurso = 6;
-let itemsPorPaginaCompletados = 6;
+let itemsPorPaginaProximos = 10;
+let itemsPorPaginaEnCurso = 10;
+let itemsPorPaginaCompletados = 10;
 
 // Arrays filtrados para paginación
 let eventosFiltradosProximos = [];
@@ -69,7 +69,7 @@ function configurarPaginacion() {
     document.getElementById('btnPrevProximos')?.addEventListener('click', () => cambiarPaginaEventos('proximos', -1));
     document.getElementById('btnNextProximos')?.addEventListener('click', () => cambiarPaginaEventos('proximos', 1));
     document.getElementById('selectItemsPorPaginaProximos')?.addEventListener('change', (e) => {
-        itemsPorPaginaProximos = parseInt(e.target.value) || 6;
+        itemsPorPaginaProximos = parseInt(e.target.value) || 10;
         paginaActualProximos = 1;
         aplicarFiltrosEventos();
     });
@@ -78,7 +78,7 @@ function configurarPaginacion() {
     document.getElementById('btnPrevEnCurso')?.addEventListener('click', () => cambiarPaginaEventos('encurso', -1));
     document.getElementById('btnNextEnCurso')?.addEventListener('click', () => cambiarPaginaEventos('encurso', 1));
     document.getElementById('selectItemsPorPaginaEnCurso')?.addEventListener('change', (e) => {
-        itemsPorPaginaEnCurso = parseInt(e.target.value) || 6;
+        itemsPorPaginaEnCurso = parseInt(e.target.value) || 10;
         paginaActualEnCurso = 1;
         aplicarFiltrosEventos();
     });
@@ -87,7 +87,7 @@ function configurarPaginacion() {
     document.getElementById('btnPrevCompletados')?.addEventListener('click', () => cambiarPaginaEventos('completados', -1));
     document.getElementById('btnNextCompletados')?.addEventListener('click', () => cambiarPaginaEventos('completados', 1));
     document.getElementById('selectItemsPorPaginaCompletados')?.addEventListener('change', (e) => {
-        itemsPorPaginaCompletados = parseInt(e.target.value) || 6;
+        itemsPorPaginaCompletados = parseInt(e.target.value) || 10;
         paginaActualCompletados = 1;
         aplicarFiltrosEventos();
     });

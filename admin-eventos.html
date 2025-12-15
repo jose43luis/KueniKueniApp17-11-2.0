@@ -145,7 +145,7 @@
                         <option value="Otro">Otro</option>
                     </select>
                 </div>
-                <div class="filtro-group">
+                <div class="filtro-group filtro-fecha">
                     <label>Rango de fechas</label>
                     <div class="socios-fechas">
                         <input type="date" id="filtroFechaDesde">
@@ -153,10 +153,13 @@
                         <input type="date" id="filtroFechaHasta">
                     </div>
                 </div>
-            </div>
-            <div class="socios-filtros-actions">
-                <button id="btnAplicarFiltrosEventos" class="btn-secondary">Aplicar filtros</button>
-                <button id="btnLimpiarFiltrosEventos" class="btn-tertiary">Limpiar</button>
+                <div class="filtro-group filtro-buttons">
+                    <label>&nbsp;</label>
+                    <div class="socios-filtros-actions">
+                        <button id="btnAplicarFiltrosEventos" class="btn-secondary">Aplicar filtros</button>
+                        <button id="btnLimpiarFiltrosEventos" class="btn-tertiary">Limpiar</button>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -202,9 +205,10 @@
                 <div class="pagination-size">
                     <label for="selectItemsPorPaginaProximos">Mostrar:</label>
                     <select id="selectItemsPorPaginaProximos">
-                        <option value="6" selected>6 por página</option>
-                        <option value="12">12 por página</option>
-                        <option value="24">24 por página</option>
+                        <option value="10" selected>10 por página</option>
+                        <option value="25">25 por página</option>
+                        <option value="50">50 por página</option>
+                        <option value="100">100 por página</option>
                     </select>
                 </div>
             </div>
@@ -238,9 +242,10 @@
                 <div class="pagination-size">
                     <label for="selectItemsPorPaginaEnCurso">Mostrar:</label>
                     <select id="selectItemsPorPaginaEnCurso">
-                        <option value="6" selected>6 por página</option>
-                        <option value="12">12 por página</option>
-                        <option value="24">24 por página</option>
+                        <option value="10" selected>10 por página</option>
+                        <option value="25">25 por página</option>
+                        <option value="50">50 por página</option>
+                        <option value="100">100 por página</option>
                     </select>
                 </div>
             </div>
@@ -274,9 +279,10 @@
                 <div class="pagination-size">
                     <label for="selectItemsPorPaginaCompletados">Mostrar:</label>
                     <select id="selectItemsPorPaginaCompletados">
-                        <option value="6" selected>6 por página</option>
-                        <option value="12">12 por página</option>
-                        <option value="24">24 por página</option>
+                        <option value="10" selected>10 por página</option>
+                        <option value="25">25 por página</option>
+                        <option value="50">50 por página</option>
+                        <option value="100">100 por página</option>
                     </select>
                 </div>
             </div>

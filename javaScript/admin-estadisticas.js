@@ -1,5 +1,5 @@
 // ============================================
-// ADMIN ESTADÍSTICAS - KUENI KUENI
+// ADMIN ESTADÍSTICAS - KUENI KUENI  
 // Sistema completo de análisis y reportes
 // ============================================
 console.log('Sistema de estadísticas iniciando...');
@@ -8,7 +8,7 @@ let donacionesGlobal = [];
 let sociosGlobal = [];
 let eventosGlobal = [];
 let añoSeleccionado = new Date().getFullYear();
-let chartDonaciones = null;
+let tabActual = 'donaciones';
 
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM cargado');
@@ -36,7 +36,6 @@ function verificarAutenticacion() {
 }
 
 function configurarEventos() {
-
     const yearSelect = document.getElementById('yearSelect');
     if (yearSelect) {
         yearSelect.addEventListener('change', function () {
@@ -51,9 +50,9 @@ function configurarEventos() {
         tab.addEventListener('click', function () {
             tabs.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
-            const tabName = this.dataset.tab;
-            console.log(`Tab seleccionado: ${tabName}`);
-            cambiarTab(tabName);
+            tabActual = this.dataset.tab;
+            console.log(`Tab seleccionado: ${tabActual}`);
+            cambiarTab(tabActual);
         });
     });
 
@@ -78,7 +77,7 @@ async function cargarDatos() {
         ]);
 
         calcularEstadisticas();
-        inicializarGrafica();
+        cambiarTab(tabActual);
 
         mostrarLoader(false);
         console.log('Datos cargados correctamente');
@@ -99,7 +98,13 @@ async function cargarDonaciones() {
         if (error) throw error;
 
         donacionesGlobal = donaciones || [];
-        console.log(`${donacionesGlobal.length} donaciones cargadas`);
+        console.log('=== DONACIONES CARGADAS ===');
+        console.log(`Total de donaciones: ${donacionesGlobal.length}`);
+        
+        if (donacionesGlobal.length > 0) {
+            console.log('Primera donación:', donacionesGlobal[0]);
+            console.log('Tipo de fecha_donacion:', typeof donacionesGlobal[0].fecha_donacion);
+        }
 
     } catch (error) {
         console.error('Error cargando donaciones:', error);
@@ -109,14 +114,15 @@ async function cargarDonaciones() {
 
 async function cargarSocios() {
     try {
-        const { data: socios, error } = await window.supabaseClient
-            .from('socios')
-            .select('*');
+        const { data: usuarios, error } = await window.supabaseClient
+            .from('usuarios')
+            .select('*')
+            .eq('tipo_usuario', 'socio');
 
         if (error) throw error;
 
-        sociosGlobal = socios || [];
-        console.log(`${sociosGlobal.length} socios cargados`);
+        sociosGlobal = usuarios || [];
+        console.log(`Total de socios cargados: ${sociosGlobal.length}`);
 
     } catch (error) {
         console.error('Error cargando socios:', error);
@@ -141,52 +147,95 @@ async function cargarEventos() {
     }
 }
 
+function obtenerAño(fechaString) {
+    if (!fechaString) return null;
+    
+    try {
+        // Crear objeto Date y obtener año directamente
+        const fecha = new Date(fechaString);
+        if (!isNaN(fecha.getTime())) {
+            return fecha.getFullYear();
+        }
+    } catch (error) {
+        console.error('Error parseando fecha:', fechaString);
+    }
+    
+    return null;
+}
+
+function obtenerAñoYMes(fechaString) {
+    if (!fechaString) return null;
+    
+    try {
+        const fecha = new Date(fechaString);
+        if (!isNaN(fecha.getTime())) {
+            return {
+                año: fecha.getFullYear(),
+                mes: fecha.getMonth()
+            };
+        }
+    } catch (error) {
+        console.error('Error parseando fecha:', fechaString);
+    }
+    
+    return null;
+}
+
 function calcularEstadisticas() {
-    // Filtrar donaciones del año
+    // Filtrar donaciones del año seleccionado
     const donacionesAño = donacionesGlobal.filter(d => {
-        const fecha = new Date(d.fecha_donacion);
-        return fecha.getFullYear() === añoSeleccionado;
+        const año = obtenerAño(d.fecha_donacion);
+        return año === añoSeleccionado;
     });
 
-    const donacionesCompletadas = donacionesAño.filter(d => d.estado_pago === 'completado');
+    console.log(`=== AÑO ${añoSeleccionado} ===`);
+    console.log(`Donaciones del año: ${donacionesAño.length}`);
 
-    // Total recaudado
-    const totalRecaudado = donacionesCompletadas.reduce((sum, d) =>
-        sum + parseFloat(d.monto || 0), 0
-    );
+    // Filtrar completadas
+    const donacionesCompletadas = donacionesAño.filter(d => {
+        const estado = (d.estado_pago || '').toLowerCase().trim();
+        return estado === 'completado' || estado === 'completada' || estado === 'pagado' || estado === 'pagada' || estado === 'aprobado' || estado === 'aprobada';
+    });
+    
+    console.log(`Donaciones completadas: ${donacionesCompletadas.length}`);
 
-    // Donación promedio
-    const promedioRecaudado = donacionesCompletadas.length > 0
-        ? totalRecaudado / donacionesCompletadas.length
-        : 0;
+    const totalRecaudado = donacionesCompletadas.reduce((sum, d) => sum + parseFloat(d.monto || 0), 0);
+    const promedioRecaudado = donacionesCompletadas.length > 0 ? totalRecaudado / donacionesCompletadas.length : 0;
 
-    // Año anterior
     const donacionesAñoAnterior = donacionesGlobal.filter(d => {
-        const fecha = new Date(d.fecha_donacion);
-        return fecha.getFullYear() === (añoSeleccionado - 1);
+        const año = obtenerAño(d.fecha_donacion);
+        return año === (añoSeleccionado - 1);
     });
 
     const totalAñoAnterior = donacionesAñoAnterior
-        .filter(d => d.estado_pago === 'completado')
+        .filter(d => {
+            const estado = (d.estado_pago || '').toLowerCase().trim();
+            return estado === 'completado' || estado === 'completada' || estado === 'pagado' || estado === 'pagada';
+        })
         .reduce((sum, d) => sum + parseFloat(d.monto || 0), 0);
 
     const crecimientoIngresos = totalAñoAnterior > 0
         ? ((totalRecaudado - totalAñoAnterior) / totalAñoAnterior) * 100
         : 0;
 
-    // Actualizar UI - Ingresos
-    document.getElementById('totalRecaudado').textContent =
-        '$' + Math.round(totalRecaudado).toLocaleString('es-MX');
+    document.getElementById('totalRecaudado').textContent = '$' + Math.round(totalRecaudado).toLocaleString('es-MX');
     actualizarCambio('cambioIngresos', crecimientoIngresos);
 
-    // Actualizar UI - Donación Promedio
-    document.getElementById('donacionPromedio').textContent =
-        '$' + Math.round(promedioRecaudado).toLocaleString('es-MX');
+    document.getElementById('donacionPromedio').textContent = '$' + Math.round(promedioRecaudado).toLocaleString('es-MX');
 
-    const promedioAnterior = donacionesAñoAnterior.filter(d => d.estado_pago === 'completado').length > 0
-        ? donacionesAñoAnterior.filter(d => d.estado_pago === 'completado')
+    const promedioAnterior = donacionesAñoAnterior.filter(d => {
+        const estado = (d.estado_pago || '').toLowerCase().trim();
+        return estado === 'completado' || estado === 'completada' || estado === 'pagado' || estado === 'pagada';
+    }).length > 0
+        ? donacionesAñoAnterior.filter(d => {
+            const estado = (d.estado_pago || '').toLowerCase().trim();
+            return estado === 'completado' || estado === 'completada' || estado === 'pagado' || estado === 'pagada';
+        })
             .reduce((sum, d) => sum + parseFloat(d.monto || 0), 0) /
-        donacionesAñoAnterior.filter(d => d.estado_pago === 'completado').length
+        donacionesAñoAnterior.filter(d => {
+            const estado = (d.estado_pago || '').toLowerCase().trim();
+            return estado === 'completado' || estado === 'completada' || estado === 'pagado' || estado === 'pagada';
+        }).length
         : 0;
 
     const cambioPromedio = promedioAnterior > 0
@@ -195,26 +244,29 @@ function calcularEstadisticas() {
 
     actualizarCambio('cambioPromedio', cambioPromedio);
 
-    // Socios activos
-    const sociosActivos = sociosGlobal.filter(s => s.estado === 'activo');
-    document.getElementById('totalSocios').textContent = sociosActivos.length;
-
-    const sociosAñoAnteriorActivos = sociosGlobal.filter(s => {
-        if (!s.fecha_ingreso) return false;
-        const fecha = new Date(s.fecha_ingreso);
-        return fecha.getFullYear() < añoSeleccionado && s.estado === 'activo';
+    const sociosDelAñoSeleccionado = sociosGlobal.filter(s => {
+        if (!s.fecha_registro) return false;
+        const año = obtenerAño(s.fecha_registro);
+        return año === añoSeleccionado;
     });
 
-    const crecimientoSocios = sociosAñoAnteriorActivos.length > 0
-        ? ((sociosActivos.length - sociosAñoAnteriorActivos.length) / sociosAñoAnteriorActivos.length) * 100
-        : 0;
+    document.getElementById('totalSocios').textContent = sociosDelAñoSeleccionado.length;
+
+    const sociosAñoAnterior = sociosGlobal.filter(s => {
+        if (!s.fecha_registro) return false;
+        const año = obtenerAño(s.fecha_registro);
+        return año === (añoSeleccionado - 1);
+    });
+
+    const crecimientoSocios = sociosAñoAnterior.length > 0
+        ? ((sociosDelAñoSeleccionado.length - sociosAñoAnterior.length) / sociosAñoAnterior.length) * 100
+        : (sociosDelAñoSeleccionado.length > 0 ? 100 : 0);
 
     actualizarCambio('cambioSocios', crecimientoSocios);
 
-    // Eventos
     const eventosAño = eventosGlobal.filter(e => {
-        const fecha = new Date(e.fecha_evento);
-        return fecha.getFullYear() === añoSeleccionado;
+        const año = obtenerAño(e.fecha_evento);
+        return año === añoSeleccionado;
     });
 
     const eventosCompletados = eventosAño.filter(e => e.estado === 'completado');
@@ -227,137 +279,392 @@ function calcularEstadisticas() {
 
     document.querySelector('.est-desc').textContent = `${eventosProximos.length} próximos`;
 
-    // Análisis detallado
-    const tasa = donacionesAño.length > 0
-        ? (donacionesCompletadas.length / donacionesAño.length) * 100
-        : 0;
-
-    const maxDonacion = donacionesCompletadas.length > 0
-        ? Math.max(...donacionesCompletadas.map(d => parseFloat(d.monto)))
-        : 0;
-
-    document.querySelectorAll('.analysis-grid .analysis-item')[0]
-        .querySelector('h4').textContent = '$' + Math.round(totalRecaudado).toLocaleString('es-MX');
-    document.querySelectorAll('.analysis-grid .analysis-item')[0]
-        .querySelector('.analysis-right span').textContent = donacionesCompletadas.length;
-
-    document.querySelectorAll('.analysis-grid .analysis-item')[1]
-        .querySelector('h4').textContent = '$' + Math.round(promedioRecaudado).toLocaleString('es-MX');
-    document.querySelectorAll('.analysis-grid .analysis-item')[1]
-        .querySelector('.analysis-right span').textContent = '$' + Math.round(maxDonacion).toLocaleString('es-MX');
-
-    document.querySelectorAll('.analysis-grid .analysis-item')[2]
-        .querySelector('h4').textContent = tasa.toFixed(1) + '%';
-    document.querySelectorAll('.analysis-grid .analysis-item')[2]
-        .querySelector('.analysis-right span').textContent = '+' + crecimientoIngresos.toFixed(1) + '%';
-
     console.log('Estadísticas calculadas');
 }
 
-function inicializarGrafica() {
-    const ctx = document.getElementById('donacionesChart');
-    if (!ctx) return;
+function cambiarTab(tab) {
+    console.log(`Cambiando a tab: ${tab}`);
+    
+    const container = document.querySelector('.estadisticas-content');
+    if (!container) return;
 
-    const datos = obtenerDatosMensuales();
-
-    if (chartDonaciones) {
-        chartDonaciones.data.datasets[0].data = datos;
-        chartDonaciones.update();
-        console.log('Gráfica actualizada');
-        return;
+    if (tab === 'socios') {
+        mostrarTablaSocios();
+    } else if (tab === 'donaciones') {
+        mostrarTablaDonaciones();
+    } else if (tab === 'eventos') {
+        mostrarTablaEventos();
     }
-
-    const config = {
-        type: 'line',
-        data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-            datasets: [{
-                label: 'Monto',
-                data: datos,
-                borderColor: '#6366f1',
-                backgroundColor: 'transparent',
-                borderWidth: 2,
-                pointRadius: 4,
-                pointBackgroundColor: '#6366f1',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointHoverRadius: 6,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: '#18181b',
-                    padding: 12,
-                    titleColor: '#ffffff',
-                    bodyColor: '#ffffff',
-                    borderColor: '#e4e4e7',
-                    borderWidth: 1,
-                    displayColors: false,
-                    callbacks: {
-                        label: function (context) {
-                            return '$' + Math.round(context.parsed.y).toLocaleString('es-MX') + ' MXN';
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function (value) {
-                            return '$' + (value / 1000).toFixed(0) + 'k';
-                        },
-                        color: '#71717a',
-                        font: {
-                            size: 11
-                        }
-                    },
-                    grid: {
-                        color: '#f4f4f5',
-                        drawBorder: false
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#71717a',
-                        font: {
-                            size: 11
-                        }
-                    },
-                    grid: {
-                        display: false
-                    }
-                }
-            }
-        }
-    };
-
-    chartDonaciones = new Chart(ctx, config);
-    console.log('Gráfica inicializada');
 }
 
-function obtenerDatosMensuales() {
+function mostrarTablaDonaciones() {
+    const container = document.querySelector('.estadisticas-content');
+    if (!container) return;
+
+    // Filtrar donaciones del año seleccionado
+    const donacionesDelAño = donacionesGlobal.filter(d => {
+        if (!d.fecha_donacion) return false;
+        const año = obtenerAño(d.fecha_donacion);
+        if (año !== añoSeleccionado) return false;
+        
+        const estado = (d.estado_pago || '').toLowerCase().trim();
+        return estado === 'completado' || estado === 'completada' || estado === 'pagado' || estado === 'pagada' || estado === 'aprobado' || estado === 'aprobada';
+    });
+
+    console.log(`Tabla: Mostrando ${donacionesDelAño.length} donaciones`);
+
+    // Contar por mes
     const meses = Array(12).fill(0);
-
-    const donacionesAño = donacionesGlobal.filter(d => {
-        const fecha = new Date(d.fecha_donacion);
-        return fecha.getFullYear() === añoSeleccionado && d.estado_pago === 'completado';
+    const montosPorMes = Array(12).fill(0);
+    
+    donacionesDelAño.forEach(donacion => {
+        const fechaInfo = obtenerAñoYMes(donacion.fecha_donacion);
+        if (fechaInfo) {
+            meses[fechaInfo.mes]++;
+            montosPorMes[fechaInfo.mes] += parseFloat(donacion.monto || 0);
+        }
     });
 
-    donacionesAño.forEach(donacion => {
-        const fecha = new Date(donacion.fecha_donacion);
-        const mes = fecha.getMonth();
-        meses[mes] += parseFloat(donacion.monto || 0);
+    const totalDonaciones = donacionesDelAño.length;
+    const totalMonto = montosPorMes.reduce((a, b) => a + b, 0);
+    const promedio = totalDonaciones > 0 ? totalMonto / totalDonaciones : 0;
+
+    const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    const maxMonto = Math.max(...montosPorMes, 1);
+
+    container.innerHTML = `
+        <div style="background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+            <div style="margin-bottom: 2.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 style="color: #18181b; font-size: 1.75rem; font-weight: 700; margin: 0;">
+                            Análisis de Donaciones ${añoSeleccionado}
+                        </h2>
+                        <p style="color: #71717a; font-size: 1rem; margin: 0.25rem 0 0 0;">
+                            Desglose mensual de ingresos por donaciones
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #5f0d51 0%, #7c1a6d 100%);">
+                            <th style="padding: 1.25rem 1.5rem; text-align: left; color: white; font-weight: 600; font-size: 1rem; border-top-left-radius: 12px; width: 25%;">
+                                Mes
+                            </th>
+                            <th style="padding: 1.25rem 1.5rem; text-align: center; color: white; font-weight: 600; font-size: 1rem;">
+                                Donaciones
+                            </th>
+                            <th style="padding: 1.25rem 1.5rem; text-align: center; color: white; font-weight: 600; font-size: 1rem;">
+                                Monto Total
+                            </th>
+                            <th style="padding: 1.25rem 1.5rem; text-align: left; color: white; font-weight: 600; font-size: 1rem; border-top-right-radius: 12px;">
+                                Progreso
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mesesNombres.map((mes, index) => {
+                            const cantidad = meses[index];
+                            const monto = montosPorMes[index];
+                            const porcentaje = maxMonto > 0 ? (monto / maxMonto) * 100 : 0;
+                            const esParImpar = index % 2 === 0;
+                            
+                            return `
+                                <tr style="background: ${esParImpar ? '#f9fafb' : 'white'}; transition: all 0.2s; cursor: pointer;" 
+                                    onmouseover="this.style.background='#f0f9ff'; this.style.transform='scale(1.01)'"
+                                    onmouseout="this.style.background='${esParImpar ? '#f9fafb' : 'white'}'; this.style.transform='scale(1)'">
+                                    <td style="padding: 1.25rem 1.5rem; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb; font-size: 1rem;">
+                                        ${mes}
+                                    </td>
+                                    <td style="padding: 1.25rem 1.5rem; text-align: center; border-bottom: 1px solid #e5e7eb;">
+                                        <span style="display: inline-block; min-width: 45px; padding: 0.5rem 1rem; background: ${cantidad > 0 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : '#f3f4f6'}; color: ${cantidad > 0 ? 'white' : '#9ca3af'}; font-weight: 700; font-size: 1.1rem; border-radius: 8px;">
+                                            ${cantidad}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 1.25rem 1.5rem; text-align: center; border-bottom: 1px solid #e5e7eb;">
+                                        <span style="display: inline-block; min-width: 80px; padding: 0.5rem 1rem; background: ${monto > 0 ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : '#f3f4f6'}; color: ${monto > 0 ? 'white' : '#9ca3af'}; font-weight: 700; font-size: 1.1rem; border-radius: 8px;">
+                                            $${Math.round(monto).toLocaleString('es-MX')}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb;">
+                                        <div style="background: #e5e7eb; height: 12px; border-radius: 999px; overflow: hidden; position: relative;">
+                                            <div style="position: absolute; top: 0; left: 0; height: 100%; width: ${porcentaje}%; background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); border-radius: 999px; transition: width 0.5s ease;"></div>
+                                        </div>
+                                        <span style="font-size: 0.75rem; color: #71717a; margin-top: 0.25rem; display: block;">
+                                            ${porcentaje.toFixed(0)}% del mes mayor
+                                        </span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                        <tr style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); font-weight: 700; border-top: 3px solid #6366f1;">
+                            <td style="padding: 1.5rem; color: #18181b; font-size: 1.15rem; border-bottom-left-radius: 12px;">
+                                TOTAL ${añoSeleccionado}
+                            </td>
+                            <td style="padding: 1.5rem; text-align: center;">
+                                <span style="display: inline-block; padding: 0.5rem 1.25rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 1.3rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);">
+                                    ${totalDonaciones}
+                                </span>
+                            </td>
+                            <td style="padding: 1.5rem; text-align: center;">
+                                <span style="display: inline-block; padding: 0.5rem 1.25rem; background: linear-gradient(135deg, #5f0d51 0%, #7c1a6d 100%); color: white; font-size: 1.3rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(95, 13, 81, 0.3);">
+                                    $${Math.round(totalMonto).toLocaleString('es-MX')}
+                                </span>
+                            </td>
+                            <td style="padding: 1.5rem; border-bottom-right-radius: 12px;">
+                                <span style="color: #6366f1; font-size: 1rem; font-weight: 600;">
+                                    ✓ Año completo
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function mostrarTablaSocios() {
+    const container = document.querySelector('.estadisticas-content');
+    if (!container) return;
+
+    const sociosDelAño = sociosGlobal.filter(s => {
+        if (!s.fecha_registro) return false;
+        const año = obtenerAño(s.fecha_registro);
+        return año === añoSeleccionado;
     });
 
-    return meses;
+    const meses = Array(12).fill(0);
+    sociosDelAño.forEach(socio => {
+        const fechaInfo = obtenerAñoYMes(socio.fecha_registro);
+        if (fechaInfo) {
+            meses[fechaInfo.mes]++;
+        }
+    });
+
+    const total = sociosDelAño.length;
+    const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const maxCantidad = Math.max(...meses, 1);
+
+    container.innerHTML = `
+        <div style="background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+            <div style="margin-bottom: 2.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 style="color: #18181b; font-size: 1.75rem; font-weight: 700; margin: 0;">
+                            Nuevos Socios ${añoSeleccionado}
+                        </h2>
+                        <p style="color: #71717a; font-size: 1rem; margin: 0.25rem 0 0 0;">
+                            Registro mensual de socios en la plataforma
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #5f0d51 0%, #7c1a6d 100%);">
+                            <th style="padding: 1.25rem 1.5rem; text-align: left; color: white; font-weight: 600; font-size: 1rem; border-top-left-radius: 12px; width: 30%;">
+                                Mes
+                            </th>
+                            <th style="padding: 1.25rem 1.5rem; text-align: center; color: white; font-weight: 600; font-size: 1rem;">
+                                Socios Registrados
+                            </th>
+                            <th style="padding: 1.25rem 1.5rem; text-align: left; color: white; font-weight: 600; font-size: 1rem; border-top-right-radius: 12px;">
+                                Progreso
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mesesNombres.map((mes, index) => {
+                            const cantidad = meses[index];
+                            const porcentaje = maxCantidad > 0 ? (cantidad / maxCantidad) * 100 : 0;
+                            const esParImpar = index % 2 === 0;
+                            
+                            return `
+                                <tr style="background: ${esParImpar ? '#f9fafb' : 'white'}; transition: all 0.2s; cursor: pointer;" 
+                                    onmouseover="this.style.background='#f0f9ff'; this.style.transform='scale(1.01)'"
+                                    onmouseout="this.style.background='${esParImpar ? '#f9fafb' : 'white'}'; this.style.transform='scale(1)'">
+                                    <td style="padding: 1.25rem 1.5rem; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb; font-size: 1rem;">
+                                        ${mes}
+                                    </td>
+                                    <td style="padding: 1.25rem 1.5rem; text-align: center; border-bottom: 1px solid #e5e7eb;">
+                                        <span style="display: inline-block; min-width: 45px; padding: 0.5rem 1rem; background: ${cantidad > 0 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : '#f3f4f6'}; color: ${cantidad > 0 ? 'white' : '#9ca3af'}; font-weight: 700; font-size: 1.25rem; border-radius: 8px;">
+                                            ${cantidad}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb;">
+                                        <div style="background: #e5e7eb; height: 12px; border-radius: 999px; overflow: hidden; position: relative;">
+                                            <div style="position: absolute; top: 0; left: 0; height: 100%; width: ${porcentaje}%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius: 999px; transition: width 0.5s ease;"></div>
+                                        </div>
+                                        <span style="font-size: 0.75rem; color: #71717a; margin-top: 0.25rem; display: block;">
+                                            ${porcentaje.toFixed(0)}% del máximo
+                                        </span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                        <tr style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); font-weight: 700; border-top: 3px solid #10b981;">
+                            <td style="padding: 1.5rem; color: #18181b; font-size: 1.15rem; border-bottom-left-radius: 12px;">
+                                TOTAL ${añoSeleccionado}
+                            </td>
+                            <td style="padding: 1.5rem; text-align: center;">
+                                <span style="display: inline-block; padding: 0.5rem 1.25rem; background: linear-gradient(135deg, #5f0d51 0%, #7c1a6d 100%); color: white; font-size: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(95, 13, 81, 0.3);">
+                                    ${total}
+                                </span>
+                            </td>
+                            <td style="padding: 1.5rem; border-bottom-right-radius: 12px;">
+                                <span style="color: #10b981; font-size: 1rem; font-weight: 600;">
+                                    ✓ Año completo
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function mostrarTablaEventos() {
+    const container = document.querySelector('.estadisticas-content');
+    if (!container) return;
+
+    // Filtrar eventos del año seleccionado
+    const eventosDelAño = eventosGlobal.filter(e => {
+        if (!e.fecha_evento) return false;
+        const año = obtenerAño(e.fecha_evento);
+        return año === añoSeleccionado;
+    });
+
+    console.log(`Tabla: Mostrando ${eventosDelAño.length} eventos`);
+
+    // Contar por mes
+    const meses = Array(12).fill(0);
+    
+    eventosDelAño.forEach(evento => {
+        const fechaInfo = obtenerAñoYMes(evento.fecha_evento);
+        if (fechaInfo) {
+            meses[fechaInfo.mes]++;
+        }
+    });
+
+    const totalEventos = eventosDelAño.length;
+    const eventosCompletados = eventosDelAño.filter(e => e.estado === 'completado').length;
+    const eventosProximos = eventosDelAño.filter(e => {
+        const fechaEvento = new Date(e.fecha_evento);
+        return fechaEvento > new Date();
+    }).length;
+
+    const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    const maxCantidad = Math.max(...meses, 1);
+
+    container.innerHTML = `
+        <div style="background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+            <div style="margin-bottom: 2.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 style="color: #18181b; font-size: 1.75rem; font-weight: 700; margin: 0;">
+                            Análisis de Eventos ${añoSeleccionado}
+                        </h2>
+                        <p style="color: #71717a; font-size: 1rem; margin: 0.25rem 0 0 0;">
+                            Calendario mensual de eventos realizados
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #5f0d51 0%, #7c1a6d 100%);">
+                            <th style="padding: 1.25rem 1.5rem; text-align: left; color: white; font-weight: 600; font-size: 1rem; border-top-left-radius: 12px; width: 30%;">
+                                Mes
+                            </th>
+                            <th style="padding: 1.25rem 1.5rem; text-align: center; color: white; font-weight: 600; font-size: 1rem;">
+                                Eventos Realizados
+                            </th>
+                            <th style="padding: 1.25rem 1.5rem; text-align: left; color: white; font-weight: 600; font-size: 1rem; border-top-right-radius: 12px;">
+                                Progreso
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mesesNombres.map((mes, index) => {
+                            const cantidad = meses[index];
+                            const porcentaje = maxCantidad > 0 ? (cantidad / maxCantidad) * 100 : 0;
+                            const esParImpar = index % 2 === 0;
+                            
+                            return `
+                                <tr style="background: ${esParImpar ? '#f9fafb' : 'white'}; transition: all 0.2s; cursor: pointer;" 
+                                    onmouseover="this.style.background='#f0f9ff'; this.style.transform='scale(1.01)'"
+                                    onmouseout="this.style.background='${esParImpar ? '#f9fafb' : 'white'}'; this.style.transform='scale(1)'">
+                                    <td style="padding: 1.25rem 1.5rem; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb; font-size: 1rem;">
+                                        ${mes}
+                                    </td>
+                                    <td style="padding: 1.25rem 1.5rem; text-align: center; border-bottom: 1px solid #e5e7eb;">
+                                        <span style="display: inline-block; min-width: 45px; padding: 0.5rem 1rem; background: ${cantidad > 0 ? 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)' : '#f3f4f6'}; color: ${cantidad > 0 ? 'white' : '#9ca3af'}; font-weight: 700; font-size: 1.25rem; border-radius: 8px;">
+                                            ${cantidad}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb;">
+                                        <div style="background: #e5e7eb; height: 12px; border-radius: 999px; overflow: hidden; position: relative;">
+                                            <div style="position: absolute; top: 0; left: 0; height: 100%; width: ${porcentaje}%; background: linear-gradient(90deg, #1e40af 0%, #1e3a8a 100%); border-radius: 999px; transition: width 0.5s ease;"></div>
+                                        </div>
+                                        <span style="font-size: 0.75rem; color: #71717a; margin-top: 0.25rem; display: block;">
+                                            ${porcentaje.toFixed(0)}% del máximo
+                                        </span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                        <tr style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); font-weight: 700; border-top: 3px solid #1e40af;">
+                            <td style="padding: 1.5rem; color: #18181b; font-size: 1.15rem; border-bottom-left-radius: 12px;">
+                                TOTAL ${añoSeleccionado}
+                            </td>
+                            <td style="padding: 1.5rem; text-align: center;">
+                                <span style="display: inline-block; padding: 0.5rem 1.25rem; background: linear-gradient(135deg, #5f0d51 0%, #7c1a6d 100%); color: white; font-size: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(95, 13, 81, 0.3);">
+                                    ${totalEventos}
+                                </span>
+                            </td>
+                            <td style="padding: 1.5rem; border-bottom-right-radius: 12px;">
+                                <span style="color: #1e40af; font-size: 1rem; font-weight: 600;">
+                                    ✓ Año completo
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
 }
 
 function actualizarCambio(elementoId, porcentaje) {
@@ -373,1610 +680,245 @@ function actualizarCambio(elementoId, porcentaje) {
 }
 
 function exportarReporte() {
-    // Contenedor del mensaje flotante
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.35);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    `;
-
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 1.5rem 1.75rem;
-        max-width: 360px;
-        width: 90%;
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        color: #0f172a;
-    `;
-
-    modal.innerHTML = `
-        <h3 style="margin:0 0 0.25rem;font-size:1.1rem;font-weight:700;color:#111827;">
-            Exportar reporte
-        </h3>
-        <p style="margin:0 0 1rem;font-size:0.9rem;color:#6b7280;">
-            Elige el formato en el que deseas descargar el reporte del año actual.
-        </p>
-        <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.75rem;">
-            <button id="btnExportPDF" style="
-                width:100%;
-                padding:0.6rem 0.9rem;
-                border-radius:999px;
-                border:1px solid #5f0d51;
-                background:#5f0d51;
-                color:#fff;
-                font-size:0.9rem;
-                font-weight:600;
-                cursor:pointer;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                gap:0.4rem;
-            ">
-                <span>📄 PDF </span>
-            </button>
-            <button id="btnExportCSV" style="
-                width:100%;
-                padding:0.6rem 0.9rem;
-                border-radius:999px;
-                border:1px solid #e5e7eb;
-                background:#f9fafb;
-                color:#111827;
-                font-size:0.9rem;
-                font-weight:600;
-                cursor:pointer;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                gap:0.4rem;
-            ">
-                <span>📊 CSV </span>
-            </button>
-        </div>
-        <button id="btnExportCancelar" style="
-            width:100%;
-            margin-top:0.25rem;
-            padding:0.45rem 0.9rem;
-            border-radius:999px;
-            border:none;
-            background:transparent;
-            color:#6b7280;
-            font-size:0.85rem;
-            cursor:pointer;
-        ">
-            Cancelar
-        </button>
-    `;
-
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-    // Cerrar helper
-    const cerrar = () => {
-        document.body.removeChild(overlay);
-    };
-
-    // Eventos
-    modal.querySelector('#btnExportPDF').addEventListener('click', async () => {
-        cerrar();
-        mostrarNotificacion('Generando reporte PDF profesional...', 'info');
-        await exportarPDF();
-    });
-
-    modal.querySelector('#btnExportCSV').addEventListener('click', async () => {
-        cerrar();
-        mostrarNotificacion('Generando archivo CSV limpio y estructurado...', 'info');
-        await exportarCSV();
-    });
-
-    modal.querySelector('#btnExportCancelar').addEventListener('click', cerrar);
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) cerrar();
-    });
-}
-
-
-function exportarCSV() {
-    mostrarNotificacion('Generando archivo CSV mejorado y limpio...', 'info');
-    
-    try {
-        // ============================================
-        // CONFIGURACIÓN Y UTILIDADES MEJORADAS
-        // ============================================
-        const añoActual = añoSeleccionado;
-        const separador = ';';
-
-        // Función mejorada para sanitizar texto
-        const sanitizarTexto = (texto) => {
-            if (texto === null || texto === undefined || texto === '') return '""';
-            
-            let textoLimpio = String(texto)
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/"/g, '""')
-                .replace(/\r?\n/g, ' ')
-                .trim();
-            
-            // Si después de limpiar está vacío, retornar vacío
-            if (!textoLimpio) return '""';
-            
-            return `"${textoLimpio}"`;
-        };
-
-        // Función para obtener nombre significativo
-        const obtenerNombreSignificativo = (socio) => {
-            // Intentar diferentes campos de nombre
-            const nombre = socio.nombre || socio.nombre_completo || socio.nombres || 
-                          socio.email || socio.telefono || 'Miembro de la comunidad';
-            
-            // Si el nombre es muy genérico o parece un placeholder, mejorarlo
-            if (nombre.toLowerCase().includes('sin nombre') || 
-                nombre.toLowerCase().includes('sin nombre') ||
-                nombre === '""' || 
-                !nombre.trim()) {
-                return 'Miembro de la comunidad';
-            }
-            
-            return nombre;
-        };
-
-        // Función para limpiar título de evento
-        const limpiarTituloEvento = (titulo) => {
-            if (!titulo || titulo === '""') return 'Actividad comunitaria';
-            
-            const tituloLimpio = String(titulo)
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/"/g, '""')
-                .replace(/\r?\n/g, ' ')
-                .trim();
-            
-            // Filtrar títulos inapropiados o de prueba
-            const titulosInapropiados = [
-                'peleas de perros', 'peleas de perros2', 'casita', 'qwdwed', 
-                'cum', 'wwd', 'roque vs poronga', 'ssdwd', 'sss', 'qww', 'wedwe'
-            ];
-            
-            if (titulosInapropiados.includes(tituloLimpio.toLowerCase())) {
-                return 'Actividad comunitaria';
-            }
-            
-            // Si el título es muy corto o parece placeholder
-            if (tituloLimpio.length < 3 || /^[0-9a-z]+$/.test(tituloLimpio)) {
-                return 'Actividad comunitaria';
-            }
-            
-            return tituloLimpio;
-        };
-
-        // Función para corregir categorías
-        const corregirCategoria = (categoria, titulo) => {
-            if (!categoria || categoria === '""') return 'General';
-            
-            const catLimpia = String(categoria).toLowerCase().trim();
-            
-            // Corregir categorías mal asignadas
-            if (titulo && titulo.toLowerCase().includes('futbol')) {
-                return 'Deporte';
-            }
-            if (titulo && titulo.toLowerCase().includes('taller') && titulo.toLowerCase().includes('artesania')) {
-                return 'Cultura';
-            }
-            if (titulo && titulo.toLowerCase().includes('donacion') && titulo.toLowerCase().includes('ropa')) {
-                return 'Asistencia Social';
-            }
-            
-            // Mapeo de categorías
-            const mapeoCategorias = {
-                'salud': 'Salud',
-                'deporte': 'Deporte',
-                'cultura': 'Cultura',
-                'educacion': 'Educación',
-                'medio ambiente': 'Medio Ambiente',
-                'emprendimiento': 'Emprendimiento',
-                'asistencia social': 'Asistencia Social',
-                'general': 'General'
-            };
-            
-            return mapeoCategorias[catLimpia] || 'General';
-        };
-
-        const sanitizarNumero = (numero) => {
-            if (numero === null || numero === undefined) return '0';
-            const num = parseFloat(numero);
-            return isNaN(num) ? '0' : num.toString().replace('.', ',');
-        };
-
-        const sanitizarMoneda = (monto) => {
-            if (monto === null || monto === undefined) return '0,00';
-            const num = parseFloat(monto);
-            return isNaN(num) ? '0,00' : num.toFixed(2).replace('.', ',');
-        };
-
-        const formatoFecha = (fecha) => {
-            if (!fecha) return 'N/D';
-            try {
-                return new Date(fecha).toISOString().split('T')[0];
-            } catch (e) {
-                return 'N/D';
-            }
-        };
-
-        // ============================================
-        // FILTRADO Y LIMPIEZA DE DATOS
-        // ============================================
-        const donacionesAño = donacionesGlobal.filter(d => {
-            if (!d || !d.fecha_donacion) return false;
-            try {
-                const fecha = new Date(d.fecha_donacion);
-                return fecha.getFullYear() === añoActual;
-            } catch (e) {
-                return false;
-            }
-        }).filter(d => d && d.monto); // Filtrar donaciones válidas
-
-        const sociosActivos = sociosGlobal
-            .filter(s => s && s.estado === 'activo')
-            .map(socio => ({
-                ...socio,
-                nombreLimpio: obtenerNombreSignificativo(socio)
-            }));
-
-        const eventosAño = eventosGlobal
-            .filter(e => {
-                if (!e || !e.fecha_evento) return false;
-                try {
-                    const fecha = new Date(e.fecha_evento);
-                    return fecha.getFullYear() === añoActual;
-                } catch (error) {
-                    return false;
-                }
-            })
-            .map(evento => ({
-                ...evento,
-                tituloLimpio: limpiarTituloEvento(evento.titulo),
-                categoriaCorregida: corregirCategoria(evento.categoria, evento.titulo)
-            }))
-            .filter(evento => {
-                // Filtrar eventos que no sean de prueba
-                const titulo = evento.tituloLimpio.toLowerCase();
-                return !titulo.includes('test') && 
-                       !titulo.includes('prueba') && 
-                       titulo !== 'actividad comunitaria' &&
-                       evento.asistentes_confirmados !== undefined;
-            });
-
-        // ============================================
-        // CÁLCULOS ESTADÍSTICOS
-        // ============================================
-        const donacionesCompletadas = donacionesAño.filter(d => d.estado_pago === 'completado');
-        const totalRecaudado = donacionesCompletadas.reduce((sum, d) => {
-            const monto = parseFloat(d.monto || 0);
-            return isNaN(monto) ? sum : sum + monto;
-        }, 0);
-
-        const eventosCompletados = eventosAño.filter(e => e.estado === 'completado');
-        const totalAsistentes = eventosCompletados.reduce((sum, e) => {
-            const asistentes = parseInt(e.asistentes_confirmados) || 0;
-            return sum + asistentes;
-        }, 0);
-
-        // ============================================
-        // CONSTRUCCIÓN DEL CSV MEJORADO
-        // ============================================
-        let csvContent = '';
-        csvContent += '\uFEFF'; // BOM para UTF-8
-
-        // METADATOS
-        csvContent += `REPORTE ANUAL KUENI KUENI - ${añoActual}\n`;
-        csvContent += `Asociacion Civil Kueni Kueni\n`;
-        csvContent += `Generado el: ${new Date().toLocaleDateString('es-MX')}\n`;
-        csvContent += `Nochixtlan, Oaxaca, Mexico\n`;
-        csvContent += `Contacto: contacto@kuenikueni.org | +52 951 123 4567\n`;
-        csvContent += `Nota: Datos limpios y validados automaticamente\n`;
-        csvContent += `\n`;
-
-        // RESUMEN EJECUTIVO
-        csvContent += `RESUMEN EJECUTIVO ${añoActual}\n`;
-        csvContent += `Metrica${separador}Valor${separador}Detalles\n`;
-        csvContent += `Total Recaudado${separador}${sanitizarMoneda(totalRecaudado)}${separador}${donacionesCompletadas.length} donaciones validas\n`;
-        csvContent += `Socios Activos${separador}${sociosActivos.length}${separador}Miembros registrados\n`;
-        csvContent += `Eventos Realizados${separador}${eventosCompletados.length}${separador}${totalAsistentes} participantes totales\n`;
-        csvContent += `Eficiencia Operativa${separador}${((eventosCompletados.length / Math.max(eventosAño.length, 1)) * 100).toFixed(1)}%${separador}Eventos completados vs programados\n`;
-        csvContent += `Donacion Promedio${separador}${sanitizarMoneda(donacionesCompletadas.length > 0 ? totalRecaudado / donacionesCompletadas.length : 0)}${separador}Por donante\n`;
-        csvContent += `\n`;
-
-        // DONACIONES DETALLADAS (solo completadas)
-        csvContent += `DONACIONES VALIDADAS ${añoActual}\n`;
-        csvContent += `ID${separador}Donante${separador}Monto${separador}Metodo Pago${separador}Estado${separador}Fecha${separador}Tipo${separador}Comentarios\n`;
-        
-        donacionesCompletadas.forEach(donacion => {
-            if (!donacion) return;
-            
-            const fila = [
-                donacion.id || 'N/D',
-                sanitizarTexto(donacion.donante_nombre || 'Donante anonimo'),
-                sanitizarMoneda(donacion.monto),
-                sanitizarTexto(donacion.metodo_pago || 'Efectivo'),
-                sanitizarTexto(donacion.estado_pago),
-                formatoFecha(donacion.fecha_donacion),
-                sanitizarTexto(donacion.tipo_donacion || 'Apoyo general'),
-                sanitizarTexto(donacion.comentarios || 'Sin comentarios')
-            ];
-            
-            csvContent += fila.join(separador) + '\n';
-        });
-        
-        csvContent += `\n`;
-
-        // SOCIOS Y MIEMBROS (solo activos con datos limpios)
-        csvContent += `SOCIOS ACTIVOS\n`;
-        csvContent += `ID${separador}Nombre${separador}Email${separador}Telefono${separador}Estado${separador}Fecha Ingreso${separador}Total Donaciones${separador}Eventos Asistidos${separador}Referido Por${separador}Ultima Actividad\n`;
-        
-        sociosActivos.forEach(socio => {
-            if (!socio) return;
-            
-            const fila = [
-                socio.id || 'N/D',
-                sanitizarTexto(socio.nombreLimpio),
-                sanitizarTexto(socio.email || 'No registrado'),
-                sanitizarTexto(socio.telefono || 'No registrado'),
-                sanitizarTexto(socio.estado),
-                formatoFecha(socio.fecha_ingreso),
-                sanitizarNumero(socio.total_donaciones),
-                sanitizarNumero(socio.total_eventos_asistidos),
-                sanitizarTexto(socio.referido_por || 'Ingreso directo'),
-                formatoFecha(socio.ultima_actividad)
-            ];
-            
-            csvContent += fila.join(separador) + '\n';
-        });
-        
-        csvContent += `\n`;
-
-        // EVENTOS Y ACTIVIDADES (solo completados y limpios)
-        csvContent += `EVENTOS REALIZADOS ${añoActual}\n`;
-        csvContent += `ID${separador}Titulo${separador}Categoria${separador}Fecha${separador}Estado${separador}Asistentes${separador}Cupo Maximo${separador}Ocupacion${separador}Responsable${separador}Ubicacion${separador}Descripcion${separador}Costo${separador}Ingresos\n`;
-        
-        eventosCompletados.forEach(evento => {
-            if (!evento) return;
-            
-            const ocupacion = evento.cupo_maximo > 0 ? 
-                ((evento.asistentes_confirmados || 0) / evento.cupo_maximo * 100).toFixed(1) + '%' : 
-                'N/D';
-            
-            const fila = [
-                evento.id || 'N/D',
-                sanitizarTexto(evento.tituloLimpio),
-                sanitizarTexto(evento.categoriaCorregida),
-                formatoFecha(evento.fecha_evento),
-                sanitizarTexto(evento.estado),
-                sanitizarNumero(evento.asistentes_confirmados),
-                sanitizarNumero(evento.cupo_maximo),
-                ocupacion,
-                sanitizarTexto(evento.responsable || 'Coordinacion Kueni Kueni'),
-                sanitizarTexto(evento.ubicacion || 'Comunidad Mixteca'),
-                sanitizarTexto(evento.descripcion || 'Actividad de desarrollo comunitario'),
-                sanitizarMoneda(evento.costo_estimado),
-                sanitizarMoneda(evento.ingresos_generados)
-            ];
-            
-            csvContent += fila.join(separador) + '\n';
-        });
-        
-        csvContent += `\n`;
-
-        // ANÁLISIS ESTADÍSTICO
-        csvContent += `ANALISIS ESTADISTICO ${añoActual}\n`;
-        
-        // Estadísticas financieras
-        const promedioDonacion = donacionesCompletadas.length > 0 ? 
-            totalRecaudado / donacionesCompletadas.length : 0;
-        const maxDonacion = donacionesCompletadas.length > 0 ? 
-            Math.max(...donacionesCompletadas.map(d => parseFloat(d.monto || 0))) : 0;
-        
-        csvContent += `ESTADISTICAS FINANCIERAS\n`;
-        csvContent += `Metrica${separador}Valor\n`;
-        csvContent += `Donacion Promedio${separador}${sanitizarMoneda(promedioDonacion)}\n`;
-        csvContent += `Donacion Maxima${separador}${sanitizarMoneda(maxDonacion)}\n`;
-        csvContent += `Total Donaciones Validas${separador}${donacionesCompletadas.length}\n`;
-        csvContent += `Tasa de Exito${separador}${((donacionesCompletadas.length / Math.max(donacionesAño.length, 1)) * 100).toFixed(1)}%\n`;
-        csvContent += `\n`;
-        
-        // Distribución por método de pago (solo de donaciones completadas)
-        const metodoPagoStats = {};
-        donacionesCompletadas.forEach(d => {
-            const metodo = d.metodo_pago || 'No especificado';
-            metodoPagoStats[metodo] = (metodoPagoStats[metodo] || 0) + 1;
-        });
-        
-        csvContent += `DISTRIBUCION POR METODO DE PAGO\n`;
-        csvContent += `Metodo${separador}Cantidad${separador}Porcentaje\n`;
-        Object.entries(metodoPagoStats).forEach(([metodo, count]) => {
-            const porcentaje = ((count / donacionesCompletadas.length) * 100).toFixed(1);
-            csvContent += `${sanitizarTexto(metodo)}${separador}${count}${separador}${porcentaje}%\n`;
-        });
-        
-        csvContent += `\n`;
-        
-        // Distribución por categoría de eventos (solo eventos limpios)
-        const categoriaStats = {};
-        eventosCompletados.forEach(e => {
-            const categoria = e.categoriaCorregida;
-            categoriaStats[categoria] = (categoriaStats[categoria] || 0) + 1;
-        });
-        
-        csvContent += `DISTRIBUCION POR CATEGORIA DE EVENTOS\n`;
-        csvContent += `Categoria${separador}Eventos${separador}Asistentes Totales${separador}Participacion Promedio\n`;
-        Object.entries(categoriaStats).forEach(([categoria, count]) => {
-            const eventosCategoria = eventosCompletados.filter(e => e.categoriaCorregida === categoria);
-            const asistentesCategoria = eventosCategoria.reduce((sum, e) => sum + (e.asistentes_confirmados || 0), 0);
-            const participacionPromedio = count > 0 ? (asistentesCategoria / count).toFixed(1) : '0';
-            csvContent += `${sanitizarTexto(categoria)}${separador}${count}${separador}${asistentesCategoria}${separador}${participacionPromedio}\n`;
-        });
-        
-        csvContent += `\n`;
-
-        // TOP DONANTES (agrupando nombres similares)
-        csvContent += `TOP DONANTES ${añoActual}\n`;
-        
-        const donantesMap = {};
-        donacionesCompletadas.forEach(d => {
-            let donante = d.donante_nombre || 'Donante anonimo';
-            
-            // Agrupar nombres similares (case insensitive y sin espacios extras)
-            donante = donante.toLowerCase().trim();
-            const monto = parseFloat(d.monto || 0);
-            
-            if (!isNaN(monto)) {
-                donantesMap[donante] = (donantesMap[donante] || 0) + monto;
-            }
-        });
-        
-        const topDonantes = Object.entries(donantesMap)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10)
-            .map(([nombre, monto]) => [
-                nombre.charAt(0).toUpperCase() + nombre.slice(1), // Capitalizar
-                monto
-            ]);
-        
-        csvContent += `Posicion${separador}Donante${separador}Monto Total\n`;
-        
-        topDonantes.forEach(([donante, montoTotal], index) => {
-            csvContent += `${index + 1}${separador}${sanitizarTexto(donante)}${separador}${sanitizarMoneda(montoTotal)}\n`;
-        });
-        
-        csvContent += `\n`;
-
-        // EVENTOS DESTACADOS (solo eventos con asistentes)
-        csvContent += `EVENTOS MAS EXITOSOS ${añoActual}\n`;
-        
-        const eventosExitosos = eventosCompletados
-            .filter(e => e && (e.asistentes_confirmados || 0) > 0)
-            .sort((a, b) => (b.asistentes_confirmados || 0) - (a.asistentes_confirmados || 0))
-            .slice(0, 5);
-        
-        csvContent += `Posicion${separador}Evento${separador}Fecha${separador}Asistentes${separador}Cupo${separador}Ocupacion${separador}Categoria\n`;
-        
-        eventosExitosos.forEach((evento, index) => {
-            if (!evento) return;
-            
-            const ocupacion = evento.cupo_maximo > 0 ? 
-                ((evento.asistentes_confirmados || 0) / evento.cupo_maximo * 100).toFixed(1) + '%' : 
-                'N/D';
-            
-            csvContent += `${index + 1}${separador}${sanitizarTexto(evento.tituloLimpio)}${separador}${formatoFecha(evento.fecha_evento)}${separador}${evento.asistentes_confirmados || 0}${separador}${evento.cupo_maximo || 0}${separador}${ocupacion}${separador}${sanitizarTexto(evento.categoriaCorregida)}\n`;
-        });
-
-        // ============================================
-        // GENERAR Y DESCARGAR EL ARCHIVO
-        // ============================================
-        const blob = new Blob([csvContent], { 
-            type: 'text/csv;charset=utf-8;' 
-        });
-        
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        
-        link.setAttribute('href', url);
-        link.setAttribute('download', `Kueni_Kueni_Reporte_${añoActual}_Limpio.csv`);
-        link.style.visibility = 'hidden';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        URL.revokeObjectURL(url);
-        
-        mostrarNotificacion(`CSV limpio generado exitosamente para ${añoActual}`, 'success');
-        
-    } catch (error) {
-        console.error('Error al generar CSV:', error);
-        mostrarNotificacion('Error al generar el archivo CSV', 'error');
-    }
-}
-async function exportarPDF() {
-    mostrarNotificacion('Generando reporte PDF profesional...', 'info');
-
     try {
         const { jsPDF } = window.jspdf;
         if (!jsPDF) {
-            throw new Error('jsPDF no está disponible');
+            alert('Error: jsPDF no está cargado');
+            return;
         }
-
-        const doc = new jsPDF('p', 'mm', 'a4');
-
-        // Configuración de idioma y fuente
-        doc.setLanguage('es');
-        doc.setFont('helvetica');
-
-        // Paleta de colores basada en el CSS proporcionado
-        const COLOR_PRIMARIO = [94, 6, 82];        // #5e0652 - Morado principal
-        const COLOR_SECUNDARIO = [146, 72, 122];   // #92487A - Morado claro
-        const COLOR_TERCIARIO = [240, 216, 220];   // #f0d8dc - Rosa claro
-        const COLOR_AMARILLO = [202, 138, 4];      // #ca8a04 - Amarillo
-        const COLOR_AZUL = [30, 64, 175];          // #1e40af - Azul
-        const COLOR_MORADO_CLARO = [124, 58, 237]; // #7c3aed - Morado claro
-        const COLOR_GRIS_OSCURO = [24, 24, 27];    // #18181b - Gris oscuro
-        const COLOR_GRIS_MEDIO = [113, 113, 122];  // #71717a - Gris medio
-        const COLOR_GRIS_CLARO = [228, 228, 231];  // #e4e4e7 - Gris claro
-        const COLOR_FONDO = [249, 250, 251];       // #f9fafb - Fondo gris
-
-        // ============================================
-        // VALIDACIÓN Y CÁLCULO DE DATOS
-        // ============================================
-        const donacionesAño = donacionesGlobal.filter(d => {
-            if (!d || !d.fecha_donacion) return false;
-            try {
-                const fecha = new Date(d.fecha_donacion);
-                return fecha.getFullYear() === añoSeleccionado;
-            } catch (e) {
-                return false;
-            }
-        });
-
-        const donacionesCompletadas = donacionesAño.filter(d => d.estado_pago === 'completado');
-        const totalRecaudado = donacionesCompletadas.reduce((sum, d) => {
-            const monto = parseFloat(d.monto || 0);
-            return isNaN(monto) ? sum : sum + monto;
-        }, 0);
-
-        const promedio = donacionesCompletadas.length > 0 ? totalRecaudado / donacionesCompletadas.length : 0;
-        const maxDonacion = donacionesCompletadas.length > 0 ?
-            Math.max(...donacionesCompletadas.map(d => parseFloat(d.monto || 0))) : 0;
-
-        const sociosActivos = sociosGlobal.filter(s => s && s.estado === 'activo');
-        const sociosNuevosAño = sociosGlobal.filter(s => {
-            if (!s || !s.fecha_ingreso) return false;
-            try {
-                const fecha = new Date(s.fecha_ingreso);
-                return fecha.getFullYear() === añoSeleccionado;
-            } catch (e) {
-                return false;
-            }
-        });
-
-        const eventosAño = eventosGlobal.filter(e => {
-            if (!e || !e.fecha_evento) return false;
-            try {
-                const fecha = new Date(e.fecha_evento);
-                return fecha.getFullYear() === añoSeleccionado;
-            } catch (error) {
-                return false;
-            }
-        });
-
-        const eventosCompletados = eventosAño.filter(e => e.estado === 'completado');
-        const totalAsistentes = eventosCompletados.reduce((sum, e) => {
-            const asistentes = parseInt(e.asistentes_confirmados) || 0;
-            return sum + asistentes;
-        }, 0);
-
-        const eventosProximos = eventosAño.filter(e => e.estado === 'proximo');
-        const eventosCancelados = eventosAño.filter(e => e.estado === 'cancelado');
-        const totalCupo = eventosCompletados.reduce((sum, e) => sum + (e.cupo_maximo || 0), 0);
-        const ocupacionPromedio = totalCupo > 0 ? (totalAsistentes / totalCupo) * 100 : 0;
-
-        // Cálculo de crecimiento interanual
-        const donacionesAñoAnterior = donacionesGlobal.filter(d => {
-            if (!d || !d.fecha_donacion) return false;
-            try {
-                const fecha = new Date(d.fecha_donacion);
-                return fecha.getFullYear() === (añoSeleccionado - 1) && d.estado_pago === 'completado';
-            } catch (e) {
-                return false;
-            }
-        });
-
-        const totalAñoAnterior = donacionesAñoAnterior.reduce((sum, d) => {
-            const monto = parseFloat(d.monto || 0);
-            return isNaN(monto) ? sum : sum + monto;
-        }, 0);
-
-        const crecimiento = totalAñoAnterior > 0 ?
-            ((totalRecaudado - totalAñoAnterior) / totalAñoAnterior) * 100 :
-            (totalRecaudado > 0 ? 100 : 0);
-
-        // ============================================
-        // PORTADA PROFESIONAL
-        // ============================================
-        doc.setFillColor(...COLOR_PRIMARIO);
-        doc.rect(0, 0, 210, 297, 'F');
-
-        // Marco decorativo
-        doc.setDrawColor(255, 255, 255, 30);
-        doc.setLineWidth(2);
-        doc.roundedRect(25, 40, 160, 180, 10, 10, 'S');
-
-        // Contenido de portada
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(36);
-        doc.setFont('helvetica', 'bold');
-        doc.text('KUENI KUENI', 105, 80, { align: 'center' });
-
-        doc.setFontSize(20);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Reporte Anual de Gestión', 105, 100, { align: 'center' });
-
-        // Año destacado
+        
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        
+        // === PORTADA OPTIMIZADA ===
         doc.setFillColor(255, 255, 255);
-        doc.setTextColor(...COLOR_PRIMARIO);
-        doc.roundedRect(85, 115, 40, 40, 5, 5, 'F');
-        doc.setFontSize(24);
-        doc.setFont('helvetica', 'bold');
-        doc.text(añoSeleccionado.toString(), 105, 140, { align: 'center' });
-
-        // Información de la organización
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
+        
+        // Franja morada superior
+        doc.setFillColor(95, 13, 81);
+        doc.rect(0, 0, pageWidth, 35, 'F');
+        
+        // Logo K y nombre EN LA MISMA LÍNEA
+        doc.setFontSize(28);
+        doc.setFont(undefined, 'bold');
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Asociación Civil', 105, 180, { align: 'center' });
-        doc.text('Nochixtlán, Oaxaca', 105, 190, { align: 'center' });
-        doc.text('Paso a paso, construyendo comunidad', 105, 200, { align: 'center' });
-
-        // Fecha de generación
-        const hoy = new Date();
-        const fechaFormateada = hoy.toLocaleDateString('es-MX', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        doc.setFontSize(10);
-        doc.text(`Generado el ${fechaFormateada}`, 105, 250, { align: 'center' });
-        doc.text('Sistema de Gestión Kueni Kueni', 105, 260, { align: 'center' });
-
-        // ============================================
-        // PÁGINA 2: RESUMEN EJECUTIVO
-        // ============================================
-        doc.addPage();
-
-        // Encabezado de página
-        doc.setFillColor(...COLOR_PRIMARIO);
-        doc.rect(0, 0, 210, 25, 'F');
-        doc.setTextColor(255, 255, 255);
+        doc.text('K', 15, 23);
+        
         doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        doc.text('RESUMEN EJECUTIVO', 20, 16);
-
-        let y = 40;
-
-        // Introducción contextual
-        doc.setTextColor(...COLOR_GRIS_OSCURO);
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Este reporte presenta el análisis integral de la gestión de la asociación Kueni Kueni durante el año ${añoSeleccionado},`, 20, y);
-        doc.text(`mostrando el progreso en nuestras áreas principales: comunidad, medio ambiente, cultura y emprendimiento.`, 20, y + 5);
-        y += 20;
-
-        // Métricas principales en diseño de tarjetas
-        const metrics = [
-            {
-                label: 'IMPACTO ECONÓMICO',
-                value: `$${Math.round(totalRecaudado).toLocaleString('es-MX')}`,
-                subtitle: `${donacionesCompletadas.length} donaciones procesadas`,
-                color: COLOR_AMARILLO,
-                description: `Crecimiento del ${Math.abs(crecimiento).toFixed(1)}% vs ${añoSeleccionado - 1}`
+        doc.text('Kueni Kueni', 28, 23);
+        
+        // Título "Estadísticas y Reportes 2025" EN LA MISMA LÍNEA (derecha)
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.text('Estadisticas y Reportes ' + añoSeleccionado, pageWidth - margin, 23, { align: 'right' });
+        
+        // Fecha generación (en la franja morada, debajo del título)
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(255, 255, 255);
+        const ahora = new Date();
+        const fechaGen = 'Generado el ' + ahora.toLocaleDateString('es-MX') + ', ' + ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+        doc.text(fechaGen, pageWidth - margin, 30, { align: 'right' });
+        
+        // PREPARAR DATOS
+        const meses12 = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        const donacionesAño = donacionesGlobal.filter(d => {
+            if (!d.fecha_donacion) return false;
+            const fecha = new Date(d.fecha_donacion);
+            if (fecha.getFullYear() !== añoSeleccionado) return false;
+            const estado = (d.estado_pago || '').toLowerCase().trim();
+            return estado === 'completado' || estado === 'completada' || estado === 'pagado' || estado === 'pagada';
+        });
+        
+        const mesesD = Array(12).fill(0);
+        const montosM = Array(12).fill(0);
+        donacionesAño.forEach(d => {
+            const m = new Date(d.fecha_donacion).getMonth();
+            mesesD[m]++;
+            montosM[m] += parseFloat(d.monto || 0);
+        });
+        
+        const totalRecaudado = montosM.reduce((a, b) => a + b, 0);
+        const tablaD = meses12.map((m, i) => [m, mesesD[i].toString(), '$' + Math.round(montosM[i]).toLocaleString('es-MX')]);
+        tablaD.push(['TOTAL', donacionesAño.length.toString(), '$' + Math.round(totalRecaudado).toLocaleString('es-MX')]);
+        
+        const sociosAño = sociosGlobal.filter(s => {
+            if (!s.fecha_registro) return false;
+            return new Date(s.fecha_registro).getFullYear() === añoSeleccionado;
+        });
+        
+        const mesesS = Array(12).fill(0);
+        sociosAño.forEach(s => mesesS[new Date(s.fecha_registro).getMonth()]++);
+        const tablaS = meses12.map((m, i) => [m, mesesS[i].toString()]);
+        tablaS.push(['TOTAL', sociosAño.length.toString()]);
+        
+        const eventosAño = eventosGlobal.filter(e => {
+            if (!e.fecha_evento) return false;
+            return new Date(e.fecha_evento).getFullYear() === añoSeleccionado;
+        });
+        
+        const mesesE = Array(12).fill(0);
+        eventosAño.forEach(e => mesesE[new Date(e.fecha_evento).getMonth()]++);
+        const tablaE = meses12.map((m, i) => [m, mesesE[i].toString()]);
+        tablaE.push(['TOTAL', eventosAño.length.toString()]);
+        
+        // === PRIMERA TABLA EN LA PORTADA ===
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(95, 13, 81);
+        doc.text('Analisis de Donaciones', margin, 55);
+        
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text('Desglose mensual de ingresos por donaciones', margin, 62);
+        
+        doc.autoTable({
+            startY: 68,
+            head: [['Mes', 'Donaciones', 'Monto Total']],
+            body: tablaD,
+            theme: 'grid',
+            headStyles: { 
+                fillColor: [95, 13, 81], 
+                textColor: 255, 
+                fontStyle: 'bold',
+                fontSize: 10
             },
-            {
-                label: 'COMUNIDAD ACTIVA',
-                value: sociosActivos.length.toString(),
-                subtitle: `${sociosNuevosAño.length} nuevos integrantes`,
-                color: COLOR_AZUL,
-                description: 'Base comunitaria en crecimiento'
+            bodyStyles: { fontSize: 9 },
+            footStyles: { 
+                fillColor: [240, 240, 240], 
+                textColor: 0, 
+                fontStyle: 'bold',
+                fontSize: 9
             },
-            {
-                label: 'EVENTOS REALIZADOS',
-                value: eventosCompletados.length.toString(),
-                subtitle: `${totalAsistentes} participantes totales`,
-                color: COLOR_SECUNDARIO,
-                description: `${eventosProximos.length} eventos programados`
+            alternateRowStyles: { fillColor: [249, 250, 251] },
+            margin: { left: margin, right: margin }
+        });
+        
+        // Pie de página
+        const finalY = doc.lastAutoTable.finalY || 270;
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(150, 150, 150);
+        doc.text('© ' + new Date().getFullYear() + ' Kueni Kueni. Todos los derechos reservados.', pageWidth / 2, pageHeight - 10, { align: 'center' });
+        
+        // PAGINA 2: SOCIOS
+        doc.addPage();
+        agregarEncabezado(doc, 'Nuevos Socios', pageWidth, margin, añoSeleccionado);
+        
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text('Registro mensual de socios en la plataforma', margin, 55);
+        
+        doc.autoTable({
+            startY: 62,
+            head: [['Mes', 'Socios Registrados']],
+            body: tablaS,
+            theme: 'grid',
+            headStyles: { 
+                fillColor: [95, 13, 81], 
+                textColor: 255, 
+                fontStyle: 'bold',
+                fontSize: 10
             },
-            {
-                label: 'SOLIDARIDAD PROMEDIO',
-                value: `$${Math.round(promedio).toLocaleString('es-MX')}`,
-                subtitle: `Máxima: $${Math.round(maxDonacion).toLocaleString('es-MX')}`,
-                color: COLOR_MORADO_CLARO,
-                description: 'Donación promedio por persona'
-            }
-        ];
-
-        metrics.forEach((metric, index) => {
-            const x = index % 2 === 0 ? 20 : 110;
-            if (index % 2 === 0 && index > 0) y += 55;
-
-            // Tarjeta con borde de color
-            doc.setFillColor(255, 255, 255);
-            doc.setDrawColor(...metric.color);
-            doc.setLineWidth(2);
-            doc.roundedRect(x, y, 85, 50, 5, 5, 'FD');
-
-            // Valor principal
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...COLOR_GRIS_OSCURO);
-            doc.text(metric.value, x + 10, y + 15);
-
-            // Label
-            doc.setFontSize(8);
-            doc.setTextColor(...COLOR_GRIS_MEDIO);
-            doc.text(metric.label, x + 10, y + 22);
-
-            // Subtitle
-            doc.setFontSize(7);
-            doc.text(metric.subtitle, x + 10, y + 35);
-
-            // Description
-            doc.setTextColor(...metric.color);
-            doc.text(metric.description, x + 10, y + 42);
+            bodyStyles: { fontSize: 9 },
+            footStyles: { 
+                fillColor: [240, 240, 240], 
+                textColor: 0, 
+                fontStyle: 'bold',
+                fontSize: 9
+            },
+            alternateRowStyles: { fillColor: [249, 250, 251] },
+            margin: { left: margin, right: margin }
         });
-
-        y += 60;
-
-        // Análisis comparativo
-        doc.setFillColor(...COLOR_FONDO);
-        doc.roundedRect(20, y, 170, 45, 5, 5, 'F');
-
-        doc.setTextColor(...COLOR_GRIS_OSCURO);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('ANÁLISIS COMPARATIVO', 30, y + 10);
-
-        const tasaFinalizacion = donacionesAño.length > 0 ?
-            (donacionesCompletadas.length / donacionesAño.length) * 100 : 0;
-
-        const eficienciaEventos = eventosAño.length > 0 ?
-            (eventosCompletados.length / eventosAño.length) * 100 : 0;
-
-        const participacionPromedio = eventosCompletados.length > 0 ?
-            totalAsistentes / eventosCompletados.length : 0;
-
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Crecimiento interanual: ${crecimiento >= 0 ? '+' : ''}${crecimiento.toFixed(1)}%`, 30, y + 20);
-        doc.text(`Eficiencia en eventos: ${eficienciaEventos.toFixed(1)}% completados`, 30, y + 27);
-        doc.text(`Participación promedio: ${participacionPromedio.toFixed(1)} personas por evento`, 30, y + 34);
-        doc.text(`Ocupación de eventos: ${ocupacionPromedio.toFixed(1)}% del cupo total`, 30, y + 41);
-
-        // ============================================
-        // PÁGINA 3: ANÁLISIS VISUAL
-        // ============================================
+        
+        // Pie de página
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(150, 150, 150);
+        doc.text('© ' + new Date().getFullYear() + ' Kueni Kueni. Todos los derechos reservados.', pageWidth / 2, pageHeight - 10, { align: 'center' });
+        
+        // PAGINA 3: EVENTOS
         doc.addPage();
-
-        // Encabezado
-        doc.setFillColor(...COLOR_PRIMARIO);
-        doc.rect(0, 0, 210, 25, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        doc.text('ANÁLISIS VISUAL Y TENDENCIAS', 20, 16);
-
-        y = 35;
-
-        // Gráfica del canvas
-        try {
-            const canvas = document.getElementById('donacionesChart');
-            if (canvas && canvas.width > 0 && canvas.height > 0) {
-                // Marco para la gráfica
-                doc.setFillColor(255, 255, 255);
-                doc.setDrawColor(...COLOR_GRIS_CLARO);
-                doc.roundedRect(15, y, 180, 85, 5, 5, 'FD');
-
-                const chartImage = canvas.toDataURL('image/png', 1.0);
-                doc.addImage(chartImage, 'PNG', 20, y + 5, 170, 75);
-                y += 95;
-
-                doc.setTextColor(...COLOR_GRIS_MEDIO);
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'italic');
-                doc.text('Figura 1: Evolución mensual de donaciones y participación comunitaria', 105, y, { align: 'center' });
-                y += 10;
-            } else {
-                throw new Error('Canvas no disponible');
-            }
-        } catch (error) {
-            // Diseño alternativo cuando no hay gráfica
-            doc.setFillColor(255, 255, 255);
-            doc.setDrawColor(...COLOR_GRIS_CLARO);
-            doc.roundedRect(20, y, 170, 80, 5, 5, 'FD');
-
-            doc.setTextColor(...COLOR_GRIS_MEDIO);
-            doc.setFontSize(12);
-            doc.text('Gráfica no disponible', 105, y + 40, { align: 'center' });
-            doc.setFontSize(10);
-            doc.text('Los datos visuales estarán disponibles en la próxima actualización', 105, y + 48, { align: 'center' });
-            y += 90;
-        }
-
-        // DISTRIBUCIÓN POR CATEGORÍAS
-        doc.setTextColor(...COLOR_GRIS_OSCURO);
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text('DISTRIBUCIÓN POR CATEGORÍAS', 20, y);
-        y += 10;
-
-        // Métodos de pago
-        const metodoPago = {};
-        donacionesCompletadas.forEach(d => {
-            const metodo = d.metodo_pago || 'No especificado';
-            metodoPago[metodo] = (metodoPago[metodo] || 0) + 1;
-        });
-
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Métodos de Pago Preferidos:', 25, y);
-        y += 8;
-
-        doc.setFont('helvetica', 'normal');
-        Object.entries(metodoPago).forEach(([metodo, count]) => {
-            const porcentaje = donacionesCompletadas.length > 0 ?
-                ((count / donacionesCompletadas.length) * 100).toFixed(1) : '0.0';
-
-            // Barra visual
-            const barWidth = (count / Math.max(...Object.values(metodoPago))) * 60;
-            doc.setFillColor(...COLOR_SECUNDARIO);
-            doc.rect(30, y - 3, barWidth, 4, 'F');
-
-            doc.text(`${metodo}: ${count} (${porcentaje}%)`, 95, y);
-            y += 6;
-        });
-
-        y += 10;
-
-        // Categorías de eventos
-        const categoriasEventos = {};
-        eventosCompletados.forEach(e => {
-            const categoria = e.categoria || 'General';
-            categoriasEventos[categoria] = (categoriasEventos[categoria] || 0) + 1;
-        });
-
-        doc.setFont('helvetica', 'bold');
-        doc.text('Tipos de Eventos Realizados:', 25, y);
-        y += 8;
-
-        doc.setFont('helvetica', 'normal');
-        Object.entries(categoriasEventos).forEach(([categoria, count]) => {
-            const asistentesCategoria = eventosCompletados
-                .filter(e => (e.categoria || 'General') === categoria)
-                .reduce((sum, e) => sum + (e.asistentes_confirmados || 0), 0);
-
-            doc.text(`${categoria}: ${count} eventos, ${asistentesCategoria} asistentes`, 30, y);
-            y += 6;
-        });
-
-        y += 15;
-
-        // ANÁLISIS DE TEMPORADA
-        doc.setFillColor(...COLOR_FONDO);
-        doc.roundedRect(20, y, 170, 35, 5, 5, 'F');
-
-        doc.setTextColor(...COLOR_GRIS_OSCURO);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('PATRONES ESTACIONALES', 30, y + 10);
-
-        // Análisis simple de temporadas
-        const eventosPorMes = Array(12).fill(0);
-        eventosCompletados.forEach(e => {
-            try {
-                const mes = new Date(e.fecha_evento).getMonth();
-                eventosPorMes[mes]++;
-            } catch (error) { }
-        });
-
-        const mesMaxEventos = eventosPorMes.indexOf(Math.max(...eventosPorMes));
-        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-
+        agregarEncabezado(doc, 'Analisis de Eventos', pageWidth, margin, añoSeleccionado);
+        
         doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Mes más activo: ${meses[mesMaxEventos]} (${eventosPorMes[mesMaxEventos]} eventos)`, 30, y + 20);
-        doc.text(`Total de eventos cancelados: ${eventosCancelados.length}`, 30, y + 27);
-        doc.text(`Eficiencia operativa: ${((eventosCompletados.length / eventosAño.length) * 100).toFixed(1)}%`, 30, y + 34);
-
-        // ============================================
-        // PÁGINA 4: ANÁLISIS DETALLADO - SOLUCIÓN AL PROBLEMA DE SOBREPOSICIÓN
-        // ============================================
-        doc.addPage();
-
-        // Encabezado
-        doc.setFillColor(...COLOR_PRIMARIO);
-        doc.rect(0, 0, 210, 25, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        doc.text('ANÁLISIS DETALLADO Y RECONOCIMIENTOS', 20, 16);
-
-        y = 35;
-
-        // TOP DONANTES
-        const donantesMap = {};
-        donacionesCompletadas.forEach(d => {
-            const donante = d.donante_nombre || 'Donante Anónimo';
-            const monto = parseFloat(d.monto || 0);
-            if (!isNaN(monto)) {
-                donantesMap[donante] = (donantesMap[donante] || 0) + monto;
-            }
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text('Calendario mensual de eventos realizados', margin, 55);
+        
+        doc.autoTable({
+            startY: 62,
+            head: [['Mes', 'Eventos Realizados']],
+            body: tablaE,
+            theme: 'grid',
+            headStyles: { 
+                fillColor: [95, 13, 81], 
+                textColor: 255, 
+                fontStyle: 'bold',
+                fontSize: 10
+            },
+            bodyStyles: { fontSize: 9 },
+            footStyles: { 
+                fillColor: [240, 240, 240], 
+                textColor: 0, 
+                fontStyle: 'bold',
+                fontSize: 9
+            },
+            alternateRowStyles: { fillColor: [249, 250, 251] },
+            margin: { left: margin, right: margin }
         });
-
-        const topDonantes = Object.entries(donantesMap)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10);
-
-        doc.setTextColor(...COLOR_GRIS_OSCURO);
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text('TOP DONANTES DESTACADOS', 20, y);
-        y += 8;
-
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Reconocimiento a la solidaridad y apoyo continuo de nuestra comunidad', 20, y);
-        y += 12;
-
-        if (topDonantes.length > 0) {
-            // Cabecera de tabla
-            doc.setFillColor(...COLOR_PRIMARIO);
-            doc.roundedRect(20, y, 170, 8, 3, 3, 'F');
-            doc.setFontSize(9);
-            doc.setTextColor(255, 255, 255);
-            doc.text('#', 25, y + 5);
-            doc.text('Donante', 35, y + 5);
-            doc.text('Contribución Total', 160, y + 5, { align: 'right' });
-            y += 8;
-
-            // Filas de tabla
-            doc.setFontSize(8);
-            topDonantes.forEach(([donante, monto], index) => {
-                const isEven = index % 2 === 0;
-                doc.setFillColor(...(isEven ? [250, 250, 250] : [255, 255, 255]));
-                doc.roundedRect(20, y, 170, 7, 2, 2, 'F');
-
-                // Número
-                doc.setTextColor(...COLOR_GRIS_MEDIO);
-                doc.text((index + 1).toString(), 25, y + 5);
-
-                // Nombre del donante
-                doc.setTextColor(...COLOR_GRIS_OSCURO);
-                const nombre = donante.length > 35 ? donante.substring(0, 35) + '...' : donante;
-                doc.text(nombre, 35, y + 5);
-
-                // Monto con color según el rango
-                const colorMonto = index < 3 ? COLOR_SECUNDARIO : COLOR_GRIS_OSCURO;
-                doc.setTextColor(...colorMonto);
-                doc.text(`$${Math.round(monto).toLocaleString('es-MX')}`, 185, y + 5, { align: 'right' });
-                y += 7;
-            });
-
-            // Total destacado
-            y += 5;
-            doc.setFillColor(...COLOR_FONDO);
-            doc.roundedRect(20, y, 170, 8, 3, 3, 'F');
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...COLOR_GRIS_OSCURO);
-            doc.text('Total Recaudado (Top 10):', 120, y + 5);
-            const totalTop10 = topDonantes.reduce((sum, [, monto]) => sum + monto, 0);
-            doc.text(`$${Math.round(totalTop10).toLocaleString('es-MX')}`, 185, y + 5, { align: 'right' });
-        } else {
-            doc.setFontSize(10);
-            doc.setTextColor(...COLOR_GRIS_MEDIO);
-            doc.text('No hay datos de donaciones completadas para mostrar', 25, y);
-        }
-
-        y += 25;
-
-        // EVENTOS MÁS EXITOSOS
-        const eventosExitosos = eventosCompletados
-            .filter(e => e && (e.asistentes_confirmados || 0) > 0)
-            .sort((a, b) => (b.asistentes_confirmados || 0) - (a.asistentes_confirmados || 0))
-            .slice(0, 6); // Reducido de 8 a 6 para dar más espacio
-
-        if (eventosExitosos.length > 0) {
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...COLOR_GRIS_OSCURO);
-            doc.text('EVENTOS MÁS DESTACADOS', 20, y);
-            y += 8;
-
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
-            doc.text('Eventos con mayor participación e impacto comunitario', 20, y);
-            y += 12;
-
-            // Cabecera de tabla
-            doc.setFillColor(...COLOR_PRIMARIO);
-            doc.roundedRect(20, y, 170, 8, 3, 3, 'F');
-            doc.setFontSize(9);
-            doc.setTextColor(255, 255, 255);
-            doc.text('Evento', 25, y + 5);
-            doc.text('Particip.', 140, y + 5, { align: 'right' });
-            doc.text('Cupo', 155, y + 5, { align: 'right' });
-            doc.text('Ocupación', 170, y + 5, { align: 'right' });
-            y += 8;
-
-            // Filas de tabla
-            doc.setFontSize(8);
-            eventosExitosos.forEach((evento, index) => {
-                if (!evento) return;
-
-                // VERIFICACIÓN DE ESPACIO - SI NO HAY SUFICIENTE ESPACIO, CREAR NUEVA PÁGINA
-                if (y > 220) { // Si nos acercamos al final de la página
-                    // Agregar pie de página a la página actual
-                    doc.setDrawColor(...COLOR_PRIMARIO);
-                    doc.setLineWidth(0.5);
-                    doc.line(20, 275, 190, 275);
-                    doc.setFontSize(8);
-                    doc.setTextColor(...COLOR_GRIS_MEDIO);
-                    doc.text(`Reporte Kueni Kueni ${añoSeleccionado} - Página ${doc.internal.getNumberOfPages()} de ?`, 105, 282, { align: 'center' });
-                    doc.text('Asociación Civil Kueni Kueni | Abasolo 27, Nochixtlán, Oaxaca, México', 105, 287, { align: 'center' });
-                    doc.text('www.kuenikueni.org | contacto@kuenikueni.org | +52 951 123 4567', 105, 292, { align: 'center' });
-
-                    // Crear nueva página
-                    doc.addPage();
-                    y = 35;
-
-                    // Encabezado de la nueva página
-                    doc.setFillColor(...COLOR_PRIMARIO);
-                    doc.rect(0, 0, 210, 25, 'F');
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(16);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text('CONTINUACIÓN: MÉTRICAS DE PARTICIPACIÓN', 20, 16);
-                }
-
-                const isEven = index % 2 === 0;
-                doc.setFillColor(...(isEven ? [250, 250, 250] : [255, 255, 255]));
-                doc.roundedRect(20, y, 170, 7, 2, 2, 'F');
-
-                doc.setTextColor(...COLOR_GRIS_OSCURO);
-
-                const tituloEvento = evento.titulo || 'Evento sin título';
-                const titulo = tituloEvento.length > 40 ?
-                    tituloEvento.substring(0, 40) + '...' :
-                    tituloEvento;
-
-                const asistentes = evento.asistentes_confirmados || 0;
-                const cupo = evento.cupo_maximo || 0;
-                const ocupacion = cupo > 0 ? (asistentes / cupo) * 100 : 0;
-
-                let fecha = 'N/D';
-                try {
-                    if (evento.fecha_evento) {
-                        fecha = new Date(evento.fecha_evento).toLocaleDateString('es-MX', {
-                            month: 'short',
-                            day: 'numeric'
-                        });
-                    }
-                } catch (error) {
-                    console.warn('Fecha de evento inválida:', evento.fecha_evento);
-                }
-
-                doc.text(titulo, 25, y + 5);
-                doc.text(asistentes.toString(), 140, y + 5, { align: 'right' });
-                doc.text(cupo.toString(), 155, y + 5, { align: 'right' });
-
-                // Indicador de ocupación con color
-                const colorOcupacion = ocupacion >= 80 ? COLOR_SECUNDARIO :
-                    ocupacion >= 50 ? COLOR_AMARILLO : COLOR_GRIS_MEDIO;
-                doc.setTextColor(...colorOcupacion);
-                doc.text(`${ocupacion.toFixed(0)}%`, 170, y + 5, { align: 'right' });
-                y += 7;
-            });
-        }
-
-        y += 15;
-
-        // VERIFICACIÓN FINAL DE ESPACIO PARA MÉTRICAS DE PARTICIPACIÓN
-        if (y > 200) { // Si no hay espacio suficiente para las métricas
-            // Agregar pie de página a la página actual
-            doc.setDrawColor(...COLOR_PRIMARIO);
-            doc.setLineWidth(0.5);
-            doc.line(20, 275, 190, 275);
-            doc.setFontSize(8);
-            doc.setTextColor(...COLOR_GRIS_MEDIO);
-            doc.text(`Reporte Kueni Kueni ${añoSeleccionado} - Página ${doc.internal.getNumberOfPages()} de ?`, 105, 282, { align: 'center' });
-            doc.text('Asociación Civil Kueni Kueni | Abasolo 27, Nochixtlán, Oaxaca, México', 105, 287, { align: 'center' });
-            doc.text('www.kuenikueni.org | contacto@kuenikueni.org | +52 951 123 4567', 105, 292, { align: 'center' });
-
-            // Crear nueva página para las métricas
-            doc.addPage();
-            y = 35;
-
-            // Encabezado de la nueva página
-            doc.setFillColor(...COLOR_PRIMARIO);
-            doc.rect(0, 0, 210, 25, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.text('MÉTRICAS DE PARTICIPACIÓN COMUNITARIA', 20, 16);
-            y = 45; // Posición después del encabezado
-        }
-
-        // MÉTRICAS DE PARTICIPACIÓN
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...COLOR_GRIS_OSCURO);
-        doc.text('MÉTRICAS DE PARTICIPACIÓN COMUNITARIA', 20, y);
-        y += 15;
-
-        const eventosAsistidos = sociosActivos.reduce((sum, s) => {
-            const asistencias = parseInt(s.total_eventos_asistidos) || 0;
-            return sum + asistencias;
-        }, 0);
-
-        const promedioParticipacion = sociosActivos.length > 0 ?
-            eventosAsistidos / sociosActivos.length : 0;
-
-        const sociosDonantes = sociosActivos.filter(s => {
-            const donaciones = parseInt(s.total_donaciones) || 0;
-            return donaciones > 0;
-        }).length;
-
-        const tasaContribucion = sociosActivos.length > 0 ?
-            (sociosDonantes / sociosActivos.length) * 100 : 0;
-
-        // Asegurar que el texto de crecimiento comunitario esté bien formateado
-        const textoCrecimiento = `Crecimiento comunitario: ${sociosNuevosAño.length} nuevos miembros en ${añoSeleccionado}`;
-
-        const metricasParticipacion = [
-            `Base comunitaria activa: ${sociosActivos.length} miembros`,
-            `Participación promedio: ${promedioParticipacion.toFixed(1)} eventos por socio`,
-            `Tasa de contribución: ${tasaContribucion.toFixed(1)}% de socios son donantes`,
-            `Total de interacciones: ${eventosAsistidos} asistencias registradas`,
-            `Eficiencia organizativa: ${((eventosCompletados.length / eventosAño.length) * 100).toFixed(1)}% de eventos completados`,
-            textoCrecimiento // Usar la variable formateada correctamente
-        ];
-
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        metricasParticipacion.forEach(metrica => {
-            // Verificar si hay espacio para la siguiente línea
-            if (y > 250) {
-                // Agregar pie de página y crear nueva página
-                doc.setDrawColor(...COLOR_PRIMARIO);
-                doc.setLineWidth(0.5);
-                doc.line(20, 275, 190, 275);
-                doc.setFontSize(8);
-                doc.setTextColor(...COLOR_GRIS_MEDIO);
-                doc.text(`Reporte Kueni Kueni ${añoSeleccionado} - Página ${doc.internal.getNumberOfPages()} de ?`, 105, 282, { align: 'center' });
-                doc.text('Asociación Civil Kueni Kueni | Abasolo 27, Nochixtlán, Oaxaca, México', 105, 287, { align: 'center' });
-                doc.text('www.kuenikueni.org | contacto@kuenikueni.org | +52 951 123 4567', 105, 292, { align: 'center' });
-
-                doc.addPage();
-                y = 35;
-
-                // Encabezado de continuación
-                doc.setFillColor(...COLOR_PRIMARIO);
-                doc.rect(0, 0, 210, 25, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(16);
-                doc.setFont('helvetica', 'bold');
-                doc.text('CONTINUACIÓN: MÉTRICAS DE PARTICIPACIÓN', 20, 16);
-                y = 45;
-
-                // Re-escribir el título en la nueva página
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...COLOR_GRIS_OSCURO);
-                doc.text('MÉTRICAS DE PARTICIPACIÓN COMUNITARIA', 20, y);
-                y += 15;
-
-                doc.setFontSize(9);
-                doc.setFont('helvetica', 'normal');
-            }
-
-            doc.text(metrica, 25, y);
-            y += 6;
-        });
-
-        // ============================================
-        // PÁGINA 5: CONCLUSIONES Y PERSPECTIVAS
-        // ============================================
-        doc.addPage();
-
-        // Encabezado
-        doc.setFillColor(...COLOR_PRIMARIO);
-        doc.rect(0, 0, 210, 25, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        doc.text('CONCLUSIONES Y PERSPECTIVAS FUTURAS', 20, 16);
-
-        y = 35;
-
-        // RESUMEN DE LOGROS
-        doc.setTextColor(...COLOR_GRIS_OSCURO);
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text('LOGROS DESTACADOS ' + añoSeleccionado, 20, y);
-        y += 10;
-
-        const logros = [
-            `Recaudación histórica de $${Math.round(totalRecaudado).toLocaleString('es-MX')} destinados a proyectos comunitarios`,
-            `Crecimiento del ${Math.abs(crecimiento).toFixed(1)}% en apoyo económico respecto al año anterior`,
-            `${eventosCompletados.length} eventos realizados impactando a ${totalAsistentes} personas`,
-            `Fortalecimiento de la base comunitaria con ${sociosNuevosAño.length} nuevos miembros`,
-            `Eficiencia del ${((eventosCompletados.length / eventosAño.length) * 100).toFixed(1)}% en ejecución de actividades`,
-            `Promedio de ${participacionPromedio.toFixed(1)} participantes por evento comunitario`
-        ];
-
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        logros.forEach(logro => {
-            doc.text(logro, 25, y);
-            y += 6;
-        });
-
-        y += 15;
-
-        // ÁREAS DE OPORTUNIDAD
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text('ÁREAS DE OPORTUNIDAD', 20, y);
-        y += 10;
-
-        const oportunidades = [
-            `Incrementar la tasa de finalización de donaciones (actualmente ${tasaFinalizacion.toFixed(1)}%)`,
-            `Mejorar la ocupación de eventos (actual ${ocupacionPromedio.toFixed(1)}% del cupo disponible)`,
-            `Diversificar métodos de pago para facilitar contribuciones`,
-            `Fortalecer la retención de nuevos miembros (${sociosNuevosAño.length} incorporados)`,
-            `Optimizar la planificación para reducir eventos cancelados (${eventosCancelados.length} este año)`
-        ];
-
-        doc.setFontSize(9);
-        oportunidades.forEach(oportunidad => {
-            doc.text(oportunidad, 25, y);
-            y += 6;
-        });
-
-        y += 15;
-
-        // PERSPECTIVAS
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text('PERSPECTIVAS ' + (añoSeleccionado + 1), 20, y);
-        y += 10;
-
-        const perspectivas = [
-            `Meta de crecimiento: Incrementar la recaudación en un 25% para el próximo año`,
-            `Expansión comunitaria: Alcanzar los ${sociosActivos.length + 20} miembros activos`,
-            `Diversificación: Implementar 3 nuevos tipos de eventos comunitarios`,
-            `Tecnología: Completar la migración al sistema de gestión Kueni Kueni 2.0`,
-            `Impacto: Duplicar el número de beneficiarios directos en la Mixteca Oaxaqueña`
-        ];
-
-        doc.setFontSize(9);
-        perspectivas.forEach(perspectiva => {
-            doc.text(perspectiva, 25, y);
-            y += 6;
-        });
-
-        y += 20;
-
-        // MENSAJE FINAL
-        doc.setFillColor(...COLOR_FONDO);
-        doc.roundedRect(20, y, 170, 25, 5, 5, 'F');
-
-        doc.setTextColor(...COLOR_PRIMARIO);
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text('"Paso a paso, construyendo comunidad" - Kueni Kueni', 105, y + 10, { align: 'center' });
-
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Este reporte refleja el compromiso continuo de nuestra asociación con el desarrollo', 105, y + 17, { align: 'center' });
-        doc.text('integral de la Mixteca Oaxaqueña y el apoyo a grupos vulnerables.', 105, y + 22, { align: 'center' });
-
-        // ============================================
-        // PIE DE PÁGINA EN TODAS LAS PÁGINAS
-        // ============================================
-        const totalPages = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPages; i++) {
-            doc.setPage(i);
-
-            // Línea decorativa
-            doc.setDrawColor(...COLOR_PRIMARIO);
-            doc.setLineWidth(0.5);
-            doc.line(20, 275, 190, 275);
-
-            // Información del pie
-            doc.setFontSize(8);
-            doc.setTextColor(...COLOR_GRIS_MEDIO);
-            doc.text(`Reporte Kueni Kueni ${añoSeleccionado} - Página ${i} de ${totalPages}`, 105, 282, { align: 'center' });
-            doc.text('Asociación Civil Kueni Kueni | Abasolo 27, Nochixtlán, Oaxaca, México', 105, 287, { align: 'center' });
-            doc.text('www.kuenikueni.org | contacto@kuenikueni.org | +52 951 123 4567', 105, 292, { align: 'center' });
-        }
-
-        // GUARDAR
-        doc.save(`Reporte_Kueni_Kueni_${añoSeleccionado}_Profesional.pdf`);
-
-        mostrarNotificacion('Reporte PDF profesional generado exitosamente', 'success');
-
+        
+        // Pie de página
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(150, 150, 150);
+        doc.text('© ' + new Date().getFullYear() + ' Kueni Kueni. Todos los derechos reservados.', pageWidth / 2, pageHeight - 10, { align: 'center' });
+        
+        doc.save('Estadisticas_KueniKueni_' + añoSeleccionado + '.pdf');
+        
     } catch (error) {
-        console.error('Error al generar PDF:', error);
-        mostrarNotificacion('Error al generar PDF. Generando CSV alternativo...', 'error');
-        setTimeout(() => exportarCSV(), 2000);
-    }
-}
-function cambiarTab(tab) {
-    console.log(`Cambiando a tab: ${tab}`);
-
-    const chartCard = document.querySelector('.chart-card');
-    const analysisCard = document.querySelector('.analysis-card');
-
-    if (!chartCard || !analysisCard) return;
-
-    switch (tab) {
-        case 'donaciones':
-            chartCard.querySelector('h3').textContent = 'Donaciones Mensuales';
-            chartCard.querySelector('.chart-subtitle').textContent = 'Evolución de ingresos por donaciones (MXN)';
-            analysisCard.querySelector('h3').textContent = 'Análisis de Donaciones';
-            analysisCard.querySelector('.analysis-subtitle').textContent = 'Estadísticas detalladas del periodo';
-
-            if (chartDonaciones) {
-                const datos = obtenerDatosMensuales();
-                chartDonaciones.data.datasets[0].data = datos;
-                chartDonaciones.update();
-            }
-
-            mostrarAnalisisDonaciones();
-            break;
-
-        case 'socios':
-            chartCard.querySelector('h3').textContent = 'Crecimiento de Socios';
-            chartCard.querySelector('.chart-subtitle').textContent = 'Evolución de socios activos por mes';
-            analysisCard.querySelector('h3').textContent = 'Análisis de Socios';
-            analysisCard.querySelector('.analysis-subtitle').textContent = 'Estadísticas de participación';
-
-            if (chartDonaciones) {
-                const datos = obtenerSociosMensuales();
-                chartDonaciones.data.datasets[0].data = datos;
-                chartDonaciones.data.datasets[0].borderColor = '#15803d';
-                chartDonaciones.data.datasets[0].pointBackgroundColor = '#15803d';
-                chartDonaciones.update();
-            }
-
-            mostrarAnalisisSocios();
-            break;
-
-        case 'eventos':
-            chartCard.querySelector('h3').textContent = 'Eventos por Mes';
-            chartCard.querySelector('.chart-subtitle').textContent = 'Número de eventos realizados mensualmente';
-            analysisCard.querySelector('h3').textContent = 'Análisis de Eventos';
-            analysisCard.querySelector('.analysis-subtitle').textContent = 'Estadísticas de asistencia y ocupación';
-
-            if (chartDonaciones) {
-                const datos = obtenerEventosMensuales();
-                chartDonaciones.data.datasets[0].data = datos;
-                chartDonaciones.data.datasets[0].borderColor = '#1e40af';
-                chartDonaciones.data.datasets[0].pointBackgroundColor = '#1e40af';
-                chartDonaciones.update();
-            }
-
-            mostrarAnalisisEventos();
-            break;
-
-        case 'impacto':
-            chartCard.querySelector('h3').textContent = 'Impacto Social';
-            chartCard.querySelector('.chart-subtitle').textContent = 'Beneficiarios alcanzados por mes';
-            analysisCard.querySelector('h3').textContent = 'Análisis de Impacto';
-            analysisCard.querySelector('.analysis-subtitle').textContent = 'Alcance y resultados sociales';
-
-            if (chartDonaciones) {
-                const datos = obtenerImpactoMensual();
-                chartDonaciones.data.datasets[0].data = datos;
-                chartDonaciones.data.datasets[0].borderColor = '#7c3aed';
-                chartDonaciones.data.datasets[0].pointBackgroundColor = '#7c3aed';
-                chartDonaciones.update();
-            }
-
-            mostrarAnalisisImpacto();
-            break;
+        console.error('Error al exportar PDF:', error);
+        alert('Error al generar el PDF');
     }
 }
 
-function obtenerSociosMensuales() {
-    const meses = Array(12).fill(0);
-
-    sociosGlobal.forEach(socio => {
-        if (!socio.fecha_ingreso) return;
-        const fecha = new Date(socio.fecha_ingreso);
-        if (fecha.getFullYear() === añoSeleccionado) {
-            const mes = fecha.getMonth();
-            meses[mes]++;
-        }
-    });
-
-    // Acumulativo
-    for (let i = 1; i < 12; i++) {
-        meses[i] += meses[i - 1];
-    }
-
-    return meses;
-}
-
-function obtenerEventosMensuales() {
-    const meses = Array(12).fill(0);
-
-    const eventosAño = eventosGlobal.filter(e => {
-        const fecha = new Date(e.fecha_evento);
-        return fecha.getFullYear() === añoSeleccionado && e.estado === 'completado';
-    });
-
-    eventosAño.forEach(evento => {
-        const fecha = new Date(evento.fecha_evento);
-        const mes = fecha.getMonth();
-        meses[mes]++;
-    });
-
-    return meses;
-}
-
-function obtenerImpactoMensual() {
-    const meses = Array(12).fill(0);
-
-    const eventosAño = eventosGlobal.filter(e => {
-        const fecha = new Date(e.fecha_evento);
-        return fecha.getFullYear() === añoSeleccionado && e.estado === 'completado';
-    });
-
-    eventosAño.forEach(evento => {
-        const fecha = new Date(evento.fecha_evento);
-        const mes = fecha.getMonth();
-        meses[mes] += evento.asistentes_confirmados || 0;
-    });
-
-    return meses;
-}
-
-function mostrarAnalisisDonaciones() {
-    const donacionesAño = donacionesGlobal.filter(d => {
-        const fecha = new Date(d.fecha_donacion);
-        return fecha.getFullYear() === añoSeleccionado;
-    });
-
-    const donacionesCompletadas = donacionesAño.filter(d => d.estado_pago === 'completado');
-    const totalRecaudado = donacionesCompletadas.reduce((sum, d) => sum + parseFloat(d.monto || 0), 0);
-    const promedio = donacionesCompletadas.length > 0 ? totalRecaudado / donacionesCompletadas.length : 0;
-    const maxDonacion = donacionesCompletadas.length > 0 ? Math.max(...donacionesCompletadas.map(d => parseFloat(d.monto))) : 0;
-    const tasa = donacionesAño.length > 0 ? (donacionesCompletadas.length / donacionesAño.length) * 100 : 0;
-
-    const items = document.querySelectorAll('.analysis-grid .analysis-item');
-
-    items[0].querySelector('.analysis-label').textContent = 'Total Recaudado';
-    items[0].querySelector('h4').textContent = '$' + Math.round(totalRecaudado).toLocaleString('es-MX');
-    items[0].querySelector('.analysis-right').innerHTML = `Donaciones<span>${donacionesCompletadas.length}</span>`;
-
-    items[1].querySelector('.analysis-label').textContent = 'Donación Promedio';
-    items[1].querySelector('h4').textContent = '$' + Math.round(promedio).toLocaleString('es-MX');
-    items[1].querySelector('.analysis-right').innerHTML = `Donación Máxima<span>$${Math.round(maxDonacion).toLocaleString('es-MX')}</span>`;
-
-    items[2].querySelector('.analysis-label').textContent = 'Tasa de Completado';
-    items[2].querySelector('h4').textContent = tasa.toFixed(1) + '%';
-    items[2].querySelector('.analysis-right').innerHTML = `Crecimiento Anual<span>+${Math.abs(parseFloat(document.getElementById('cambioIngresos').textContent.match(/-?\d+\.?\d*/)[0])).toFixed(1)}%</span>`;
-}
-
-function mostrarAnalisisSocios() {
-    const sociosActivos = sociosGlobal.filter(s => s.estado === 'activo');
-    const sociosNuevosAño = sociosGlobal.filter(s => {
-        if (!s.fecha_ingreso) return false;
-        const fecha = new Date(s.fecha_ingreso);
-        return fecha.getFullYear() === añoSeleccionado;
-    });
-
-    const eventosAsistidos = sociosActivos.reduce((sum, s) => sum + (s.total_eventos_asistidos || 0), 0);
-    const promedioEventos = sociosActivos.length > 0 ? eventosAsistidos / sociosActivos.length : 0;
-
-    const sociosConDonaciones = sociosActivos.filter(s => (s.total_donaciones || 0) > 0);
-    const tasaContribucion = sociosActivos.length > 0 ? (sociosConDonaciones.length / sociosActivos.length) * 100 : 0;
-
-    const items = document.querySelectorAll('.analysis-grid .analysis-item');
-
-    items[0].querySelector('.analysis-label').textContent = 'Socios Activos';
-    items[0].querySelector('h4').textContent = sociosActivos.length;
-    items[0].querySelector('.analysis-right').innerHTML = `Nuevos en ${añoSeleccionado}<span>${sociosNuevosAño.length}</span>`;
-
-    items[1].querySelector('.analysis-label').textContent = 'Promedio de Participación';
-    items[1].querySelector('h4').textContent = promedioEventos.toFixed(1) + ' eventos';
-    items[1].querySelector('.analysis-right').innerHTML = `Eventos Totales<span>${eventosAsistidos}</span>`;
-
-    items[2].querySelector('.analysis-label').textContent = 'Tasa de Contribución';
-    items[2].querySelector('h4').textContent = tasaContribucion.toFixed(1) + '%';
-    items[2].querySelector('.analysis-right').innerHTML = `Socios Donantes<span>${sociosConDonaciones.length}</span>`;
-}
-
-function mostrarAnalisisEventos() {
-    const eventosAño = eventosGlobal.filter(e => {
-        const fecha = new Date(e.fecha_evento);
-        return fecha.getFullYear() === añoSeleccionado;
-    });
-
-    const eventosCompletados = eventosAño.filter(e => e.estado === 'completado');
-    const totalAsistentes = eventosCompletados.reduce((sum, e) => sum + (e.asistentes_confirmados || 0), 0);
-    const totalCupo = eventosCompletados.reduce((sum, e) => sum + (e.cupo_maximo || 0), 0);
-    const promedioAsistentes = eventosCompletados.length > 0 ? totalAsistentes / eventosCompletados.length : 0;
-    const ocupacionPromedio = totalCupo > 0 ? (totalAsistentes / totalCupo) * 100 : 0;
-
-    // Por categoría
-    const categorias = {};
-    eventosCompletados.forEach(e => {
-        categorias[e.categoria] = (categorias[e.categoria] || 0) + 1;
-    });
-    const categoriaMasActiva = Object.keys(categorias).reduce((a, b) => categorias[a] > categorias[b] ? a : b, '');
-
-    const items = document.querySelectorAll('.analysis-grid .analysis-item');
-
-    items[0].querySelector('.analysis-label').textContent = 'Eventos Realizados';
-    items[0].querySelector('h4').textContent = eventosCompletados.length;
-    items[0].querySelector('.analysis-right').innerHTML = `Total Asistentes<span>${totalAsistentes}</span>`;
-
-    items[1].querySelector('.analysis-label').textContent = 'Asistencia Promedio';
-    items[1].querySelector('h4').textContent = Math.round(promedioAsistentes) + ' personas';
-    items[1].querySelector('.analysis-right').innerHTML = `Ocupación<span>${ocupacionPromedio.toFixed(1)}%</span>`;
-
-    items[2].querySelector('.analysis-label').textContent = 'Categoría Más Activa';
-    items[2].querySelector('h4').textContent = categoriaMasActiva || 'N/A';
-    items[2].querySelector('.analysis-right').innerHTML = `Eventos<span>${categorias[categoriaMasActiva] || 0}</span>`;
-}
-
-function mostrarAnalisisImpacto() {
-    const eventosAño = eventosGlobal.filter(e => {
-        const fecha = new Date(e.fecha_evento);
-        return fecha.getFullYear() === añoSeleccionado && e.estado === 'completado';
-    });
-
-    const beneficiariosDirectos = eventosAño.reduce((sum, e) => sum + (e.asistentes_confirmados || 0), 0);
-
-    const sociosActivos = sociosGlobal.filter(s => s.estado === 'activo');
-    const eventosAsistidos = sociosActivos.reduce((sum, s) => sum + (s.total_eventos_asistidos || 0), 0);
-
-    const donacionesAño = donacionesGlobal.filter(d => {
-        const fecha = new Date(d.fecha_donacion);
-        return fecha.getFullYear() === añoSeleccionado && d.estado_pago === 'completado';
-    });
-    const totalRecaudado = donacionesAño.reduce((sum, d) => sum + parseFloat(d.monto || 0), 0);
-
-    const items = document.querySelectorAll('.analysis-grid .analysis-item');
-
-    items[0].querySelector('.analysis-label').textContent = 'Beneficiarios Directos';
-    items[0].querySelector('h4').textContent = beneficiariosDirectos;
-    items[0].querySelector('.analysis-right').innerHTML = `Eventos<span>${eventosAño.length}</span>`;
-
-    items[1].querySelector('.analysis-label').textContent = 'Horas de Participación';
-    items[1].querySelector('h4').textContent = (eventosAsistidos * 2).toLocaleString('es-MX') + ' horas';
-    items[1].querySelector('.analysis-right').innerHTML = `Asistencias<span>${eventosAsistidos}</span>`;
-
-    items[2].querySelector('.analysis-label').textContent = 'Recursos Movilizados';
-    items[2].querySelector('h4').textContent = '$' + Math.round(totalRecaudado).toLocaleString('es-MX');
-    items[2].querySelector('.analysis-right').innerHTML = `Donantes<span>${donacionesAño.length}</span>`;
+function agregarEncabezado(doc, titulo, pageWidth, margin, año) {
+    // Franja morada
+    doc.setFillColor(95, 13, 81);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
+    // Logo K y nombre
+    doc.setFontSize(28);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('K', 15, 23);
+    
+    doc.setFontSize(16);
+    doc.text('Kueni Kueni', 28, 23);
+    
+    // Título en la misma línea (derecha)
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('Estadisticas y Reportes ' + año, pageWidth - margin, 23, { align: 'right' });
+    
+    // Fecha generación (en blanco, en la franja)
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(255, 255, 255);
+    const ahora = new Date();
+    const fechaGen = 'Generado el ' + ahora.toLocaleDateString('es-MX') + ', ' + ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+    doc.text(fechaGen, pageWidth - margin, 30, { align: 'right' });
+    
+    // Título de sección
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(95, 13, 81);
+    doc.text(titulo, margin, 48);
 }
 
 function mostrarLoader(mostrar) {
@@ -1985,65 +927,5 @@ function mostrarLoader(mostrar) {
         loader.style.display = mostrar ? 'flex' : 'none';
     }
 }
-
-function mostrarNotificacion(mensaje, tipo) {
-    const notif = document.createElement('div');
-    notif.textContent = mensaje;
-
-    const colores = {
-        success: { bg: '#d1fae5', text: '#065f46' },
-        info: { bg: '#dbeafe', text: '#1e40af' },
-        error: { bg: '#fee2e2', text: '#dc2626' }
-    };
-
-    const color = colores[tipo] || colores.info;
-
-    notif.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        background: ${color.bg};
-        color: ${color.text};
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-        font-weight: 500;
-        animation: slideIn 0.3s ease;
-    `;
-
-    document.body.appendChild(notif);
-
-    setTimeout(() => {
-        notif.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notif.remove(), 300);
-    }, 3000);
-}
-
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
 
 console.log('Sistema de estadísticas cargado');

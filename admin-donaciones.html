@@ -151,10 +151,38 @@
                         </div>
                     </div>
 
-                    <!-- SELECTOR DE MES Y BOTÓN EXPORTAR -->
+                    <!-- SELECTOR DE AÑO Y MES Y BOTÓN EXPORTAR -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
-                        <!-- Selector de Mes -->
+                        <!-- Selectores de Año y Mes -->
                         <div style="display: flex; align-items: center; gap: 12px;">
+                            <label for="selectorAnio" style="font-weight: 500; color: #374151; font-size: 14px;">
+                                Año:
+                            </label>
+                            <select 
+                                id="selectorAnio"
+                                style="
+                                    padding: 10px 40px 10px 16px;
+                                    border: 1px solid #d1d5db;
+                                    border-radius: 6px;
+                                    background-color: white;
+                                    font-size: 14px;
+                                    color: #1f2937;
+                                    cursor: pointer;
+                                    outline: none;
+                                    transition: all 0.2s;
+                                    background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%277%27 viewBox=%270 0 12 7%27%3e%3cpath fill=%27%23374151%27 d=%27M1 1l5 5 5-5%27/%3e%3c/svg%3e');
+                                    background-repeat: no-repeat;
+                                    background-position: right 12px center;
+                                    background-size: 12px;
+                                    appearance: none;
+                                    -webkit-appearance: none;
+                                    -moz-appearance: none;
+                                    min-width: 120px;
+                                "
+                            >
+                                <!-- Opciones se generan automáticamente -->
+                            </select>
+                            
                             <label for="selectorMes" style="font-weight: 500; color: #374151; font-size: 14px;">
                                 Mes:
                             </label>
@@ -177,7 +205,7 @@
                                     appearance: none;
                                     -webkit-appearance: none;
                                     -moz-appearance: none;
-                                    min-width: 200px;
+                                    min-width: 180px;
                                 "
                             >
                                 <!-- Opciones se generan automáticamente -->
@@ -189,14 +217,13 @@
                             <!-- Botón Exportar CSV -->
                             <button id="btnExportarReporte" class="btn-primary">
                                 Exportar reporte
-                                </button>
-
+                            </button>
                         </div>
                     </div>
 
                     <!-- Filtros -->
                     <section class="socios-filtros">
-                        <div class="socios-filtros-row">
+                        <div class="socios-filtros-row socios-filtros-row-donaciones">
                             <div class="filtro-group">
                                 <label for="inputBuscar">Buscar</label>
                                 <input type="text" id="inputBuscar" placeholder="Nombre o email...">
@@ -212,18 +239,13 @@
                                     <option value="fechaDesc">Fecha descendente</option>
                                 </select>
                             </div>
-                            <div class="filtro-group">
-                                <label>Rango de fechas</label>
-                                <div class="socios-fechas">
-                                    <input type="date" id="filtroFechaDesde">
-                                    <span>a</span>
-                                    <input type="date" id="filtroFechaHasta">
+                            <div class="filtro-group filtro-buttons">
+                                <label>&nbsp;</label>
+                                <div class="socios-filtros-actions">
+                                    <button id="btnAplicarFiltros" class="btn-secondary">Aplicar filtros</button>
+                                    <button id="btnLimpiarFiltros" class="btn-tertiary">Limpiar</button>
                                 </div>
                             </div>
-                        </div>
-                        <div class="socios-filtros-actions">
-                            <button id="btnAplicarFiltros" class="btn-secondary">Aplicar filtros</button>
-                            <button id="btnLimpiarFiltros" class="btn-tertiary">Limpiar</button>
                         </div>
                     </section>
 

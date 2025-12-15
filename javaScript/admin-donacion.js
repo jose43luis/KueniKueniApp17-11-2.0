@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Sistema de donaciones inicializado');
 
     verificarAutenticacion();
-    inicializarSelectorMes();
+    inicializarSelectores();
 
     setTimeout(() => {
         if (window.supabaseClient) {
@@ -19,7 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event Listeners generales
     document.getElementById('btnExportarReporte')?.addEventListener('click', exportarReporte);
     document.getElementById('inputBuscar')?.addEventListener('input', aplicarFiltrosYRedibujar);
-    document.getElementById('selectorMes')?.addEventListener('change', cambiarMes);
+    document.getElementById('filtroOrdenar')?.addEventListener('change', aplicarFiltrosYRedibujar);
+    document.getElementById('selectorAnio')?.addEventListener('change', cambiarPeriodo);
+    document.getElementById('selectorMes')?.addEventListener('change', cambiarPeriodo);
 
     // Filtros avanzados
     document.getElementById('btnAplicarFiltros')?.addEventListener('click', aplicarFiltrosYRedibujar);
@@ -61,12 +63,14 @@ function verificarAutenticacion() {
 }
 
 
-// ================== SELECTOR DE MES ==================
+// ================== SELECTOR DE AÑO Y MES ==================
 
-function inicializarSelectorMes() {
-    const selector = document.getElementById('selectorMes');
-    if (!selector) {
-        console.warn('No se encontró el selector de mes');
+function inicializarSelectores() {
+    const selectorAnio = document.getElementById('selectorAnio');
+    const selectorMes = document.getElementById('selectorMes');
+    
+    if (!selectorAnio || !selectorMes) {
+        console.warn('No se encontraron los selectores de año y mes');
         return;
     }
 
@@ -77,43 +81,54 @@ function inicializarSelectorMes() {
     mesSeleccionado = mesActual;
     añoSeleccionado = añoActual;
 
-    const opciones = [];
-
-    for (let i = 0; i < 24; i++) {
-        const fecha = new Date(añoActual, mesActual - i, 1);
-        const mes = fecha.getMonth();
-        const año = fecha.getFullYear();
-
-        const nombreMes = fecha.toLocaleDateString('es-MX', {
-            month: 'long',
-            year: 'numeric'
-        });
-
-        const nombreCapitalizado = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
-
-        opciones.push({
-            value: `${año}-${String(mes + 1).padStart(2, '0')}`,
-            text: nombreCapitalizado,
-            selected: i === 0
+    // Inicializar selector de año (de 2022 a año actual)
+    const opcionesAnio = [];
+    for (let anio = 2022; anio <= añoActual; anio++) {
+        opcionesAnio.push({
+            value: anio,
+            text: anio.toString(),
+            selected: anio === añoActual
         });
     }
 
-    selector.innerHTML = opciones.map(op =>
+    selectorAnio.innerHTML = opcionesAnio.map(op =>
         `<option value="${op.value}" ${op.selected ? 'selected' : ''}>${op.text}</option>`
     ).join('');
 
-    console.log(`Selector inicializado: ${opciones[0].text}`);
+    // Inicializar selector de mes
+    const meses = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
+    const opcionesMes = meses.map((nombre, index) => ({
+        value: index,
+        text: nombre,
+        selected: index === mesActual
+    }));
+
+    selectorMes.innerHTML = opcionesMes.map(op =>
+        `<option value="${op.value}" ${op.selected ? 'selected' : ''}>${op.text}</option>`
+    ).join('');
+
+    console.log(`Selectores inicializados: ${meses[mesActual]} ${añoActual}`);
 }
 
-function cambiarMes() {
-    const selector = document.getElementById('selectorMes');
-    if (!selector) return;
+function cambiarPeriodo() {
+    const selectorAnio = document.getElementById('selectorAnio');
+    const selectorMes = document.getElementById('selectorMes');
+    
+    if (!selectorAnio || !selectorMes) return;
 
-    const [año, mes] = selector.value.split('-');
-    añoSeleccionado = parseInt(año);
-    mesSeleccionado = parseInt(mes) - 1;
+    añoSeleccionado = parseInt(selectorAnio.value);
+    mesSeleccionado = parseInt(selectorMes.value);
 
-    console.log(`Mes cambiado a: ${año}-${mes}`);
+    const meses = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
+    console.log(`Periodo cambiado a: ${meses[mesSeleccionado]} ${añoSeleccionado}`);
     cargarDatos();
 }
 
@@ -363,29 +378,22 @@ async function cargarDonaciones() {
 
 function obtenerFiltrosUI() {
     const inputBuscar = document.getElementById('inputBuscar');
-    const filtroFechaDesde = document.getElementById('filtroFechaDesde');
-    const filtroFechaHasta = document.getElementById('filtroFechaHasta');
-    const checkboxesOrden = document.querySelectorAll('.chk-orden');
+    const selectOrdenar = document.getElementById('filtroOrdenar');
 
     const termino = (inputBuscar?.value || '').toLowerCase().trim();
-    const fechaDesde = filtroFechaDesde?.value || '';
-    const fechaHasta = filtroFechaHasta?.value || '';
+    const ordenSeleccionado = selectOrdenar?.value || '';
 
-    const ordenSeleccionados = Array.from(checkboxesOrden || [])
-        .filter(chk => chk.checked)
-        .map(chk => chk.value);
-
-    return { termino, fechaDesde, fechaHasta, ordenSeleccionados };
+    return { termino, ordenSeleccionado };
 }
 
 function aplicarFiltrosYRedibujar() {
-    const { termino, fechaDesde, fechaHasta, ordenSeleccionados } = obtenerFiltrosUI();
+    const { termino, ordenSeleccionado } = obtenerFiltrosUI();
 
     // 1) Filtrar por texto
     let resultado = [...donacionesGlobal];
     
     // Variable para saber si se está buscando
-    let hayBusqueda = termino || fechaDesde || fechaHasta;
+    let hayBusqueda = termino;
 
     if (termino) {
         resultado = resultado.filter(donacion => {
@@ -401,24 +409,33 @@ function aplicarFiltrosYRedibujar() {
         });
     }
 
-    // 2) Filtrar por rango de fecha (si se selecciona)
-    if (fechaDesde || fechaHasta) {
-        resultado = resultado.filter(donacion => {
-            const fechaISO = donacion.fecha_donacion.split('T')[0]; // yyyy-mm-dd
-            if (fechaDesde && fechaISO < fechaDesde) return false;
-            if (fechaHasta && fechaISO > fechaHasta) return false;
-            return true;
+    // 2) Ordenar según selección
+    if (ordenSeleccionado) {
+        resultado.sort((a, b) => {
+            if (ordenSeleccionado === 'montoAsc') {
+                return parseFloat(a.monto || 0) - parseFloat(b.monto || 0);
+            }
+            if (ordenSeleccionado === 'montoDesc') {
+                return parseFloat(b.monto || 0) - parseFloat(a.monto || 0);
+            }
+            if (ordenSeleccionado === 'alfabetico') {
+                const na = (a.donante_nombre || '').toLowerCase();
+                const nb = (b.donante_nombre || '').toLowerCase();
+                return na.localeCompare(nb);
+            }
+            if (ordenSeleccionado === 'fechaAsc') {
+                return a.fecha_donacion.localeCompare(b.fecha_donacion);
+            }
+            if (ordenSeleccionado === 'fechaDesc') {
+                return b.fecha_donacion.localeCompare(a.fecha_donacion);
+            }
+            return 0;
         });
-    }
-
-    // 3) Ordenamiento múltiple según checkboxes
-    if (ordenSeleccionados.length > 0) {
-        resultado.sort((a, b) => compararDonaciones(a, b, ordenSeleccionados));
     }
 
     donacionesFiltradas = resultado;
 
-    // 4) Actualizar paginación y mostrar
+    // 3) Actualizar paginación y mostrar
     paginaActual = Math.min(paginaActual, calcularTotalPaginas());
     if (paginaActual < 1) paginaActual = 1;
 
@@ -427,50 +444,12 @@ function aplicarFiltrosYRedibujar() {
     actualizarControlesPaginacion();
 }
 
-function compararDonaciones(a, b, ordenSeleccionados) {
-    // Aplica los criterios en el orden en que están marcados
-    for (const criterio of ordenSeleccionados) {
-        let diff = 0;
-
-        if (criterio === 'montoAsc' || criterio === 'montoDesc') {
-            const ma = parseFloat(a.monto || 0);
-            const mb = parseFloat(b.monto || 0);
-            diff = ma - mb;
-            if (criterio === 'montoDesc') diff = -diff;
-        }
-
-        if (criterio === 'alfabetico') {
-            const na = (a.donante_nombre || '').toLowerCase();
-            const nb = (b.donante_nombre || '').toLowerCase();
-            if (na < nb) diff = -1;
-            if (na > nb) diff = 1;
-        }
-
-        if (criterio === 'fechaAsc' || criterio === 'fechaDesc') {
-            const fa = a.fecha_donacion;
-            const fb = b.fecha_donacion;
-            if (fa < fb) diff = -1;
-            if (fa > fb) diff = 1;
-            if (criterio === 'fechaDesc') diff = -diff;
-        }
-
-        if (diff !== 0) {
-            return diff;
-        }
-    }
-    return 0;
-}
-
 function limpiarFiltros() {
-    const filtroFechaDesde = document.getElementById('filtroFechaDesde');
-    const filtroFechaHasta = document.getElementById('filtroFechaHasta');
     const inputBuscar = document.getElementById('inputBuscar');
-    const checkboxesOrden = document.querySelectorAll('.chk-orden');
+    const selectOrdenar = document.getElementById('filtroOrdenar');
 
-    if (filtroFechaDesde) filtroFechaDesde.value = '';
-    if (filtroFechaHasta) filtroFechaHasta.value = '';
     if (inputBuscar) inputBuscar.value = '';
-    checkboxesOrden.forEach(chk => chk.checked = false);
+    if (selectOrdenar) selectOrdenar.value = '';
 
     paginaActual = 1;
     aplicarFiltrosYRedibujar();
@@ -488,8 +467,8 @@ function cambiarPagina(delta) {
     if (paginaActual > totalPaginas) paginaActual = totalPaginas;
 
     // Necesitamos saber si hay búsqueda activa
-    const { termino, fechaDesde, fechaHasta } = obtenerFiltrosUI();
-    const hayBusqueda = termino || fechaDesde || fechaHasta;
+    const { termino } = obtenerFiltrosUI();
+    const hayBusqueda = termino;
 
     mostrarDonacionesPaginadas(hayBusqueda);
     actualizarControlesPaginacion();
